@@ -1,0 +1,24 @@
+{% if cart == empty %}
+  <span class="svg-wrapper">{{ 'icon-cart-empty.svg' | inline_asset_content }}</span>
+{% else %}
+  <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
+{% endif %}
+
+<span class="header__mobile-cart-icon" aria-hidden="true">
+  <svg viewBox="0 0 28 28" fill="none">
+    <path d="M2.5 5h4l2.1 12.1h12.8l2.8-8.3H10.1" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="10.2" cy="22" r="1.4" fill="currentColor"/>
+    <circle cx="21" cy="22" r="1.4" fill="currentColor"/>
+  </svg>
+  <span class="header__mobile-cart-count">{{ cart.item_count }}</span>
+</span>
+<span class="header__desktop-action-label">CART ({{ cart.item_count }})</span>
+<span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+{%- if cart != empty -%}
+  <div class="cart-count-bubble">
+    {%- if cart.item_count < 100 -%}
+      <span aria-hidden="true">{{ cart.item_count }}</span>
+    {%- endif -%}
+    <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+  </div>
+{%- endif -%}

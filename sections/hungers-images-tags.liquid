@@ -1,0 +1,326 @@
+<div class="rounded-section">
+  <section
+    id="HungersImagesTags-{{ section.id }}"
+    class="hungers-images-tags rounded-section__inner hungers-images-tags--align-{{ section.settings.text_alignment }}{% if section.settings.reverse_layout %} hungers-images-tags--reversed{% endif %}{% if section.settings.mobile_media_first %} hungers-images-tags--mobile-media-first{% endif %}"
+    style="--hit-background: {{ section.settings.bg_color }}; --hit-content-background: {{ section.settings.content_bg_color }}; --hit-heading-color: {{ section.settings.heading_color }}; --hit-text-color: {{ section.settings.text_color }}; --hit-label-color: {{ section.settings.label_color }}; --hit-tag-color: {{ section.settings.tag_color }}; --hit-tag-background: {{ section.settings.tag_background_color }}; --hit-tag-hover: {{ section.settings.tag_hover_color }}; --hit-tag-border: {{ section.settings.tag_border_color }}; --hit-padding-top: {{ section.settings.padding_top }}px; --hit-padding-bottom: {{ section.settings.padding_bottom }}px; --hit-column-gap: {{ section.settings.column_gap }}px; --hit-content-padding-desktop: {{ section.settings.content_padding_desktop }}px; --hit-content-padding-mobile: {{ section.settings.content_padding_mobile }}px; --hit-radius: {{ section.settings.container_radius }}px; --hit-media-height-desktop: {{ section.settings.media_height_desktop }}px; --hit-media-height-mobile: {{ section.settings.media_height_mobile }}px; --hit-image-fit: {{ section.settings.image_fit }}; --hit-text-width: {{ section.settings.text_column_width }}%; --hit-heading-desktop: {{ section.settings.heading_size_desktop }}px; --hit-heading-mobile: {{ section.settings.heading_size_mobile }}px; --hit-heading-weight: {{ section.settings.heading_weight }}; --hit-text-desktop: {{ section.settings.text_size_desktop }}px; --hit-text-mobile: {{ section.settings.text_size_mobile }}px; --hit-label-desktop: {{ section.settings.label_size_desktop }}px; --hit-label-mobile: {{ section.settings.label_size_mobile }}px; --hit-tag-desktop: {{ section.settings.tag_size_desktop }}px; --hit-tag-mobile: {{ section.settings.tag_size_mobile }}px;"
+  >
+    <div class="hungers-images-tags__container">
+      <div class="hungers-images-tags__text">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="hungers-images-tags__heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.description != blank -%}
+          <div class="hungers-images-tags__description rte">{{ section.settings.description }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.label_text != blank -%}
+          <div class="hungers-images-tags__label">{{ section.settings.label_text }}</div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="hungers-images-tags__tags" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.settings.tag_text != blank -%}
+                <span class="hungers-images-tags__tag" role="listitem" {{ block.shopify_attributes }}>
+                  {{ block.settings.tag_text }}
+                </span>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="hungers-images-tags__media">
+        {%- if section.settings.video_url != blank -%}
+          <video class="hungers-images-tags__video" autoplay muted loop playsinline preload="metadata">
+            <source src="{{ section.settings.video_url }}" type="video/mp4">
+          </video>
+        {%- elsif section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: 2400
+            | image_tag:
+              widths: '550, 750, 1100, 1500, 2000, 2400',
+              sizes: '(min-width: 750px) 50vw, 100vw',
+              loading: 'lazy',
+              alt: section.settings.image_alt,
+              class: 'hungers-images-tags__image'
+          }}
+        {%- else -%}
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'hungers-images-tags__placeholder placeholder-svg' }}
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+</div>
+
+{% style %}
+  #HungersImagesTags-{{ section.id }} {
+    width: 100%;
+    overflow: hidden;
+    background: var(--hit-background);
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__container {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    gap: var(--hit-column-gap);
+    padding-block: var(--hit-padding-top) var(--hit-padding-bottom);
+  }
+
+  #HungersImagesTags-{{ section.id }}.hungers-images-tags--reversed .hungers-images-tags__container {
+    flex-direction: row-reverse;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__text,
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__media {
+    min-width: 0;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__text {
+    flex: 0 0 var(--hit-text-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--hit-content-padding-desktop);
+    border-radius: var(--hit-radius);
+    background: var(--hit-content-background);
+    text-align: left;
+  }
+
+
+  #HungersImagesTags-{{ section.id }}.hungers-images-tags--align-center .hungers-images-tags__text {
+    text-align: center;
+  }
+
+  #HungersImagesTags-{{ section.id }}.hungers-images-tags--align-right .hungers-images-tags__text {
+    text-align: right;
+  }
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__heading {
+    margin: 0 0 2rem;
+    color: var(--hit-heading-color);
+    font-size: var(--hit-heading-desktop);
+    font-weight: var(--hit-heading-weight);
+    line-height: 1.2;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__description {
+    margin-bottom: 2.5rem;
+    color: var(--hit-text-color);
+    font-size: var(--hit-text-desktop);
+    line-height: 1.6;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__description > * {
+    margin-block: 0;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__label {
+    margin-bottom: 1rem;
+    color: var(--hit-label-color);
+    font-size: var(--hit-label-desktop);
+    line-height: 1.3;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+
+  #HungersImagesTags-{{ section.id }}.hungers-images-tags--align-center .hungers-images-tags__tags {
+    justify-content: center;
+  }
+
+  #HungersImagesTags-{{ section.id }}.hungers-images-tags--align-right .hungers-images-tags__tags {
+    justify-content: flex-end;
+  }
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__tag {
+    display: inline-flex;
+    min-height: 3.2rem;
+    align-items: center;
+    padding: 0.6rem 1.6rem;
+    border: 0.1rem solid var(--hit-tag-border);
+    border-radius: var(--radius-pill, 999px);
+    color: var(--hit-tag-color);
+    background: var(--hit-tag-background);
+    font-size: var(--hit-tag-desktop);
+    line-height: 1.2;
+    transition: background-color 0.3s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__tag:hover {
+      background: var(--hit-tag-hover);
+    }
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__media {
+    flex: 1 1 0;
+    display: flex;
+    min-height: var(--hit-media-height-desktop);
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: var(--hit-radius);
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__image,
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__video,
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--hit-image-fit);
+  }
+
+  #HungersImagesTags-{{ section.id }} .hungers-images-tags__placeholder {
+    min-height: 40rem;
+    color: var(--hit-label-color);
+    background: color-mix(in srgb, var(--hit-text-color), transparent 88%);
+  }
+
+  @media screen and (max-width: 749px) {
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__container,
+    #HungersImagesTags-{{ section.id }}.hungers-images-tags--reversed .hungers-images-tags__container {
+      flex-direction: column;
+      gap: 3rem;
+      padding-block: var(--hit-padding-top) var(--hit-padding-bottom);
+    }
+
+
+    #HungersImagesTags-{{ section.id }}.hungers-images-tags--mobile-media-first .hungers-images-tags__container {
+      flex-direction: column-reverse;
+    }
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__text {
+      width: 100%;
+      flex: 1 1 auto;
+      padding: var(--hit-content-padding-mobile);
+    }
+
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__heading {
+
+      font-size: var(--hit-heading-mobile);
+    }
+
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__description {
+      font-size: var(--hit-text-mobile);
+    }
+
+
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__label {
+      font-size: var(--hit-label-mobile);
+    }
+
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__tag {
+      font-size: var(--hit-tag-mobile);
+    }
+    #HungersImagesTags-{{ section.id }} .hungers-images-tags__media {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: var(--hit-media-height-mobile);
+      aspect-ratio: auto;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Hungers Images Tags",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "How to Use Holiday Room Spray" },
+    { "type": "richtext", "id": "description", "label": "Description", "default": "<p>Spray into the air or on linens to refresh any room with a festive scent.</p>" },
+    { "type": "text", "id": "label_text", "label": "Label above tags", "default": "GOOD FOR" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text", "default": "How to use product" },
+    { "type": "url", "id": "video_url", "label": "Video URL (MP4)" },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "reverse_layout", "label": "Image left / text right", "default": false },
+    { "type": "checkbox", "id": "mobile_media_first", "label": "Show image first on mobile", "default": false },
+    {
+      "type": "select", "id": "text_alignment", "label": "Content alignment", "default": "left",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "select", "id": "image_fit", "label": "Image fit", "default": "cover",
+      "options": [
+        { "value": "cover", "label": "Cover" },
+        { "value": "contain", "label": "Contain" }
+      ]
+    },
+    { "type": "range", "id": "text_column_width", "min": 30, "max": 70, "step": 1, "unit": "%", "label": "Text column width", "default": 50 },
+    { "type": "range", "id": "column_gap", "min": 0, "max": 60, "step": 2, "unit": "px", "label": "Space between containers", "default": 20 },
+    { "type": "range", "id": "container_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Container corner radius", "default": 10 },
+    { "type": "range", "id": "content_padding_desktop", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Desktop content padding", "default": 20 },
+    { "type": "range", "id": "content_padding_mobile", "min": 0, "max": 60, "step": 2, "unit": "px", "label": "Mobile content padding", "default": 20 },
+    { "type": "range", "id": "media_height_desktop", "min": 300, "max": 900, "step": 20, "unit": "px", "label": "Desktop media minimum height", "default": 520 },
+    { "type": "range", "id": "media_height_mobile", "min": 200, "max": 700, "step": 20, "unit": "px", "label": "Mobile media minimum height", "default": 440 },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Top padding", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Bottom padding", "default": 0 },
+
+    { "type": "header", "content": "Typography" },
+    { "type": "range", "id": "heading_size_desktop", "min": 18, "max": 72, "step": 2, "unit": "px", "label": "Desktop heading size", "default": 36 },
+    { "type": "range", "id": "heading_size_mobile", "min": 16, "max": 48, "step": 2, "unit": "px", "label": "Mobile heading size", "default": 28 },
+    {
+      "type": "select", "id": "heading_weight", "label": "Heading weight", "default": "600",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi bold" },
+        { "value": "700", "label": "Bold" }
+      ]
+    },
+    { "type": "range", "id": "text_size_desktop", "min": 12, "max": 30, "step": 1, "unit": "px", "label": "Desktop description size", "default": 17 },
+    { "type": "range", "id": "text_size_mobile", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Mobile description size", "default": 16 },
+    { "type": "range", "id": "label_size_desktop", "min": 8, "max": 22, "step": 1, "unit": "px", "label": "Desktop label size", "default": 12 },
+    { "type": "range", "id": "label_size_mobile", "min": 8, "max": 20, "step": 1, "unit": "px", "label": "Mobile label size", "default": 12 },
+    { "type": "range", "id": "tag_size_desktop", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Desktop tag size", "default": 14 },
+    { "type": "range", "id": "tag_size_mobile", "min": 9, "max": 22, "step": 1, "unit": "px", "label": "Mobile tag size", "default": 14 },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Section background", "default": "#ffffff" },
+    { "type": "color", "id": "content_bg_color", "label": "Left content container", "default": "#faf8f5" },
+    { "type": "color", "id": "heading_color", "label": "Heading color", "default": "#2e2e2e" },
+    { "type": "color", "id": "text_color", "label": "Description color", "default": "#444444" },
+    { "type": "color", "id": "label_color", "label": "Label color", "default": "#777777" },
+    { "type": "color", "id": "tag_color", "label": "Tag text color", "default": "#2f2f2f" },
+    { "type": "color", "id": "tag_background_color", "label": "Tag background", "default": "#faf8f5" },
+    { "type": "color", "id": "tag_hover_color", "label": "Tag hover background", "default": "#eef0ef" },
+    { "type": "color", "id": "tag_border_color", "label": "Tag border color", "default": "#66736c" }
+  ],
+  "blocks": [
+    {
+      "type": "tag",
+      "name": "Tag item",
+      "settings": [
+        { "type": "text", "id": "tag_text", "label": "Tag text", "default": "Refresh a Space" }
+      ]
+    }
+  ],
+  "max_blocks": 5,
+  "presets": [
+    {
+      "name": "Hungers Images Tags",
+      "category": "Custom sections",
+      "blocks": [
+        { "type": "tag" },
+        { "type": "tag" },
+        { "type": "tag" }
+      ]
+    }
+  ]
+}
+{% endschema %}
