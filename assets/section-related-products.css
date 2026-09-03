@@ -5,3 +5,13 @@
 .related-products__heading {
   margin: 0 0 3rem;
 }
+
+.rounded-section--related-products {
+  max-width: var(--section-max-width);
+  padding-inline: var(--section-gutter);
+}
+
+.section-containers-enabled .content-for-layout > .shopify-section > .rounded-section--related-products {
+  max-width: none;
+  padding-inline: 0;
+}

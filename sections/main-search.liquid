@@ -271,6 +271,7 @@
                   >
                     {%- case item.object_type -%}
                       {%- when 'product' -%}
+
                         {% render 'card-product',
                           card_product: item,
                           media_aspect_ratio: section.settings.image_ratio,

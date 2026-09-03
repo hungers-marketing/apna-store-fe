@@ -404,3 +404,14 @@ quick-add-bulk .quantity__input {
 .quantity__input-disabled {
   pointer-events: none;
 }
+
+/* Custom Typography via Variables */
+.quick-add__submit {
+  font-size: var(--quick-add-button-size-mobile, 1.4rem);
+}
+
+@media screen and (min-width: 750px) {
+  .quick-add__submit {
+    font-size: var(--quick-add-button-size-desktop, 1.5rem);
+  }
+}

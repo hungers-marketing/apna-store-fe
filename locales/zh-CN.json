@@ -393,6 +393,7 @@
       "view_addresses": "查看地址",
       "return": "返回账户详细信息"
     },
+    "account_fallback": "账户",
     "activate_account": {
       "title": "激活账户",
       "subtext": "创建密码以激活您的账户。",

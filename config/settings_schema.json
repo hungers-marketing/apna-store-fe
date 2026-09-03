@@ -1,8 +1,8 @@
 [
   {
     "name": "theme_info",
-    "theme_name": "Dawn",
-    "theme_version": "16.0.0",
+    "theme_name": "Seole",
+    "theme_version": "15.5.0",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -109,10 +109,30 @@
         "content": "t:settings_schema.typography.settings.header__1.content"
       },
       {
+        "type": "select",
+        "id": "heading_font_source",
+        "label": "Choose heading font",
+        "options": [
+          {
+            "value": "shopify",
+            "label": "Selected Shopify font"
+          },
+          {
+            "value": "korataki",
+            "label": "Korataki Light Italic"
+          }
+        ],
+        "default": "korataki"
+      },
+      {
+        "type": "paragraph",
+        "content": "Choose Korataki here, or select Shopify font and use the font picker below. Custom fonts cannot appear inside Shopify's built-in font popup."
+      },
+      {
         "type": "font_picker",
         "id": "type_header_font",
         "default": "assistant_n4",
-        "label": "t:settings_schema.typography.settings.type_header_font.label"
+        "label": "Shopify heading font"
       },
       {
         "type": "range",
@@ -129,10 +149,26 @@
         "content": "t:settings_schema.typography.settings.header__2.content"
       },
       {
+        "type": "select",
+        "id": "body_font_source",
+        "label": "Choose body font",
+        "options": [
+          {
+            "value": "shopify",
+            "label": "Selected Shopify font"
+          },
+          {
+            "value": "korataki",
+            "label": "Korataki Light Italic"
+          }
+        ],
+        "default": "shopify"
+      },
+      {
         "type": "font_picker",
         "id": "type_body_font",
         "default": "assistant_n4",
-        "label": "t:settings_schema.typography.settings.type_body_font.label"
+        "label": "Shopify body font"
       },
       {
         "type": "range",
@@ -158,6 +194,66 @@
         "default": 1200,
         "unit": "px",
         "label": "t:settings_schema.layout.settings.page_width.label"
+      },
+      {
+        "type": "header",
+        "content": "Section containers"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_section_containers",
+        "label": "Enable containers for all sections",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "section_container_width",
+        "min": 1000,
+        "max": 2000,
+        "step": 50,
+        "unit": "px",
+        "label": "Container maximum width",
+        "default": 1650
+      },
+      {
+        "type": "range",
+        "id": "section_container_radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Container corner radius",
+        "default": 10
+      },
+      {
+        "type": "range",
+        "id": "section_container_gutter_desktop",
+        "min": 0,
+        "max": 60,
+        "step": 2,
+        "unit": "px",
+        "label": "Desktop side spacing",
+        "default": 24
+      },
+      {
+        "type": "range",
+        "id": "section_container_gutter_mobile",
+        "min": 0,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "Mobile side spacing",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "section_container_vertical_margin",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "Section upper and lower margin",
+        "default": 10
       },
       {
         "type": "range",
@@ -1449,38 +1545,6 @@
         "id": "cart_color_scheme",
         "label": "t:sections.all.colors.label",
         "default": "scheme-1"
-      },
-      {
-        "type": "header",
-        "content": "Free Shipping Bar"
-      },
-      {
-        "type": "checkbox",
-        "id": "show_free_shipping_bar",
-        "label": "Enable free shipping progress bar",
-        "default": true
-      },
-      {
-        "type": "number",
-        "id": "free_shipping_threshold",
-        "label": "Free shipping threshold amount",
-        "default": 50,
-        "info": "Amount in store currency (e.g. 50)"
-      }
-    ]
-  },
-  {
-    "name": "t:settings_schema.customer_accounts.name",
-    "settings": [
-      {
-        "type": "paragraph",
-        "content": "t:settings_schema.customer_accounts.settings.paragraph.content"
-      },
-      {
-        "type": "link_list",
-        "id": "customer_account_menu",
-        "default": "customer-account-main-menu",
-        "label": "t:settings_schema.customer_accounts.settings.customer_account_menu.label"
       }
     ]
   }

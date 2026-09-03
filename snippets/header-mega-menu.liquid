@@ -1,8 +1,6 @@
 {% comment %}
-  Renders a megamenu for the header.
-
-  Usage:
-  {% render 'header-mega-menu' %}
+  Collection-aware desktop mega menu.
+  Child links that point to collections become hover tabs with product previews.
 {% endcomment %}
 
 <nav class="header__inline-menu">
@@ -11,62 +9,114 @@
       <li>
         {%- if link.links != blank -%}
           <header-menu>
-            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu mega-menu--showcase">
               <summary
                 id="HeaderMenu-{{ link.handle }}"
                 class="header__menu-item list-menu__item link focus-inset"
+                aria-haspopup="true"
+                data-mega-parent-url="{{ link.url }}"
               >
-                <span
-                  {%- if link.child_active %}
-                    class="header__active-menu-item"
-                  {% endif %}
-                >
+                <span{% if link.child_active %} class="header__active-menu-item"{% endif %}>
                   {{- link.title | escape -}}
                 </span>
-                {{- 'icon-caret.svg' | inline_asset_content -}}
               </summary>
+
               <div
                 id="MegaMenu-Content-{{ forloop.index }}"
-                class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
+                class="mega-menu__content mega-showcase color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
+                style="--mega-menu-background: var(--mega-menu-surface); --mega-menu-columns: {{ section.settings.mega_menu_products_to_show }}; --mega-button-background: {{ section.settings.mega_menu_button_background }}; --mega-button-text: {{ section.settings.mega_menu_button_text_color }}; --mega-button-border: {{ section.settings.mega_menu_button_border_color }};"
                 tabindex="-1"
+                data-mega-showcase
               >
-                <ul
-                  class="mega-menu__list page-width{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
-                  role="list"
-                >
-                  {%- for childlink in link.links -%}
-                    <li>
+                <div class="mega-showcase__inner page-width">
+                  <div class="mega-showcase__tabs" role="tablist" aria-label="{{ link.title | escape }} collections">
+                    {%- for childlink in link.links -%}
                       <a
-                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                        id="MegaTab-{{ link.handle }}-{{ childlink.handle }}"
                         href="{{ childlink.url }}"
-                        class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
-                        {% if childlink.current %}
-                          aria-current="page"
-                        {% endif %}
+                        class="mega-showcase__tab{% if forloop.first %} is-active{% endif %}"
+                        role="tab"
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                        aria-controls="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
+                        data-mega-tab="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
                       >
                         {{ childlink.title | escape }}
                       </a>
-                      {%- if childlink.links != blank -%}
-                        <ul class="list-unstyled" role="list">
-                          {%- for grandchildlink in childlink.links -%}
-                            <li>
-                              <a
-                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
-                                href="{{ grandchildlink.url }}"
-                                class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
-                                {% if grandchildlink.current %}
-                                  aria-current="page"
-                                {% endif %}
-                              >
-                                {{ grandchildlink.title | escape }}
+                    {%- endfor -%}
+                  </div>
+
+                  <div class="mega-showcase__panes">
+                    {%- for childlink in link.links -%}
+                      {%- assign child_collection = childlink.object -%}
+                      <section
+                        id="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
+                        class="mega-showcase__pane{% if forloop.first %} is-active{% endif %}"
+                        role="tabpanel"
+                        aria-labelledby="MegaTab-{{ link.handle }}-{{ childlink.handle }}"
+                        {% unless forloop.first %}hidden{% endunless %}
+                      >
+                        {%- if childlink.type == 'collection_link' and child_collection != blank -%}
+                          <button class="mega-showcase__arrow mega-showcase__arrow--prev" type="button" aria-label="Previous products" data-mega-scroll="-1">
+                            {{- 'icon-caret.svg' | inline_asset_content -}}
+                          </button>
+
+                          <div class="mega-showcase__products" data-mega-product-track>
+                            {%- for product in child_collection.products limit: section.settings.mega_menu_products_to_show -%}
+                              {%- assign preview_text = product.metafields.custom.featured_card_metadata.value | default: product.description -%}
+                              <a class="mega-showcase__product" href="{{ product.url }}">
+                                {%- if product.metafields.custom.featured_card_badge.value != blank -%}
+                                  <span class="mega-showcase__badge">{{ product.metafields.custom.featured_card_badge.value | escape }}</span>
+                                {%- endif -%}
+                                <div class="mega-showcase__image media">
+                                  {%- if product.featured_image != blank -%}
+                                    {{
+                                      product.featured_image
+                                      | image_url: width: 600
+                                      | image_tag:
+                                        loading: 'lazy',
+                                        widths: '220, 320, 440, 600',
+                                        sizes: '(min-width: 990px) 240px, 40vw',
+                                        alt: product.featured_image.alt | default: product.title
+                                    }}
+                                  {%- else -%}
+                                    {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                                  {%- endif -%}
+                                </div>
+                                <div class="mega-showcase__product-copy">
+                                  <strong>{{ product.title | escape }}</strong>
+                                  {%- if preview_text != blank -%}
+                                    <span>{{ preview_text | strip_html | truncate: 55 }}</span>
+                                  {%- endif -%}
+                                </div>
                               </a>
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- endif -%}
-                    </li>
-                  {%- endfor -%}
-                </ul>
+                            {%- else -%}
+                              <p class="mega-showcase__empty">No products found in this collection.</p>
+                            {%- endfor -%}
+                          </div>
+
+                          <button class="mega-showcase__arrow mega-showcase__arrow--next" type="button" aria-label="Next products" data-mega-scroll="1">
+                            {{- 'icon-caret.svg' | inline_asset_content -}}
+                          </button>
+
+                          <a class="mega-showcase__shop-button button button--secondary" href="{{ child_collection.url }}">
+                            {{ section.settings.mega_menu_button_label | escape }}
+                          </a>
+                        {%- else -%}
+                          <div class="mega-showcase__link-panel">
+                            <a class="mega-showcase__parent-link" href="{{ childlink.url }}">{{ childlink.title | escape }}</a>
+                            {%- if childlink.links != blank -%}
+                              <ul class="list-unstyled" role="list">
+                                {%- for grandchildlink in childlink.links -%}
+                                  <li><a class="mega-menu__link link" href="{{ grandchildlink.url }}">{{ grandchildlink.title | escape }}</a></li>
+                                {%- endfor -%}
+                              </ul>
+                            {%- endif -%}
+                          </div>
+                        {%- endif -%}
+                      </section>
+                    {%- endfor -%}
+                  </div>
+                </div>
               </div>
             </details>
           </header-menu>
@@ -75,17 +125,9 @@
             id="HeaderMenu-{{ link.handle }}"
             href="{{ link.url }}"
             class="header__menu-item list-menu__item link link--text focus-inset"
-            {% if link.current %}
-              aria-current="page"
-            {% endif %}
+            {% if link.current %}aria-current="page"{% endif %}
           >
-            <span
-              {%- if link.current %}
-                class="header__active-menu-item"
-              {% endif %}
-            >
-              {{- link.title | escape -}}
-            </span>
+            <span{% if link.current %} class="header__active-menu-item"{% endif %}>{{ link.title | escape }}</span>
           </a>
         {%- endif -%}
       </li>

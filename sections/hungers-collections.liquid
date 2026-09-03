@@ -1,0 +1,520 @@
+{% comment %} Hungers Collections editorial carousel {% endcomment %}
+
+{%- liquid
+  assign card_ratio = '1 / 1'
+  case section.settings.image_ratio
+    when 'portrait'
+      assign card_ratio = '4 / 5'
+    when 'landscape'
+      assign card_ratio = '4 / 3'
+  endcase
+-%}
+
+{%- style -%}
+  #HungersCollections-{{ section.id }} {
+    --hc-background: {{ section.settings.background_color }};
+    --hc-text: {{ section.settings.text_color }};
+    --hc-card-text: {{ section.settings.card_text_color }};
+    --hc-card-width: {{ section.settings.card_width }}px;
+    --hc-card-ratio: {{ card_ratio }};
+    --hc-gap: {{ section.settings.card_gap }}px;
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round }}px;
+    color: var(--hc-text);
+    background: var(--hc-background);
+  }
+
+  #HungersCollections-{{ section.id }} .hungers-collections__heading {
+    font-size: {{ section.settings.heading_size_mobile }}px;
+  }
+
+  #HungersCollections-{{ section.id }} .hungers-collections__shade {
+    opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+  }
+
+  @media screen and (min-width: 750px) {
+    #HungersCollections-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+
+    #HungersCollections-{{ section.id }} .hungers-collections__heading {
+      font-size: {{ section.settings.heading_size_desktop }}px;
+    }
+  }
+{%- endstyle -%}
+
+<hungers-collections id="HungersCollections-{{ section.id }}" class="hungers-collections">
+  <div class="hungers-collections__layout">
+    <div class="hungers-collections__intro">
+      {%- if section.settings.heading != blank -%}
+        <div class="hungers-collections__heading">{{ section.settings.heading }}</div>
+      {%- endif -%}
+      {%- if section.settings.link_label != blank -%}
+        <a class="hungers-collections__link" href="{{ section.settings.link_url | default: routes.all_products_collection_url }}">
+          {{ section.settings.link_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="hungers-collections__carousel">
+      <button class="hungers-collections__arrow hungers-collections__arrow--previous" type="button" aria-label="Previous collections" data-hc-previous>
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </button>
+
+      <ul class="hungers-collections__track list-unstyled" role="list" data-hc-track>
+        {%- for block in section.blocks -%}
+          {%- assign selected_collection = block.settings.collection -%}
+          {%- assign card_image = block.settings.image | default: selected_collection.featured_image -%}
+          {%- assign card_title = block.settings.title | default: selected_collection.title -%}
+          {%- assign card_url = selected_collection.url | default: routes.all_products_collection_url -%}
+          <li class="hungers-collections__slide" {{ block.shopify_attributes }}>
+            <a class="hungers-collections__card" href="{{ card_url }}" aria-label="{{ card_title | escape }}">
+              <div class="hungers-collections__media">
+                {%- if card_image != blank -%}
+                  {{
+                    card_image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '240, 360, 540, 720, 900',
+                      sizes: '(min-width: 990px) 300px, 78vw',
+                      alt: card_image.alt | default: card_title
+                  }}
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+                <span class="hungers-collections__shade" aria-hidden="true"></span>
+                {%- if card_title != blank -%}
+                  <span class="hungers-collections__card-title">{{ card_title | escape }}</span>
+                {%- endif -%}
+              </div>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      <button class="hungers-collections__arrow hungers-collections__arrow--next" type="button" aria-label="Next collections" data-hc-next>
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </button>
+    </div>
+  </div>
+</hungers-collections>
+
+<style>
+  .hungers-collections {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-card, 10px);
+  }
+
+  .hungers-collections__layout {
+    display: grid;
+    grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+    gap: clamp(2rem, 3vw, 4.5rem);
+    align-items: stretch;
+    padding-inline: 2rem;
+  }
+
+  .hungers-collections__intro {
+    display: flex;
+    min-height: 100%;
+    padding-block: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hungers-collections__heading {
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .hungers-collections__heading p { margin: 0; }
+  .hungers-collections__heading em { font-weight: 400; }
+
+  .hungers-collections__link {
+    margin-top: auto;
+    padding-bottom: 0.35rem;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    border-bottom: 0.1rem solid currentColor;
+  }
+
+  .hungers-collections__carousel {
+    position: relative;
+    min-width: 0;
+  }
+
+  .hungers-collections__track {
+    display: flex;
+    gap: var(--hc-gap);
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .hungers-collections__track.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+    user-select: none;
+  }
+
+  .hungers-collections__track::-webkit-scrollbar { display: none; }
+
+  .hungers-collections__slide {
+    width: var(--hc-card-width);
+    flex: 0 0 var(--hc-card-width);
+    scroll-snap-align: start;
+  }
+
+  .hungers-collections__card {
+    display: block;
+    color: var(--hc-card-text);
+    text-decoration: none;
+  }
+
+  .hungers-collections__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--hc-card-ratio);
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.04);
+    border-radius: calc(var(--radius-card, 10px) * 0.75);
+  }
+
+  .hungers-collections__media img,
+  .hungers-collections__media svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 500ms ease;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .hungers-collections__card:hover img { transform: scale(1.035); }
+
+  .hungers-collections__shade {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    pointer-events: none;
+  }
+
+  .hungers-collections__card-title {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: 1.5rem;
+    left: 1.5rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.8rem, 1.7vw, 2.8rem);
+    line-height: 1.1;
+    text-align: center;
+    transform: translateY(-50%);
+  }
+
+  .hungers-collections__arrow {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    display: grid;
+    width: 4.2rem;
+    height: 4.2rem;
+    padding: 0;
+    place-items: center;
+    color: var(--hc-text);
+    background: var(--hc-background);
+    border: 0.1rem solid currentColor;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+
+  .hungers-collections__arrow:disabled { visibility: hidden; }
+  .hungers-collections__arrow .icon { width: 1.2rem; }
+  .hungers-collections__arrow--previous { left: 1rem; }
+  .hungers-collections__arrow--next { right: 1rem; }
+  .hungers-collections__arrow--previous .icon { transform: rotate(90deg); }
+  .hungers-collections__arrow--next .icon { transform: rotate(-90deg); }
+
+  @media screen and (max-width: 749px) {
+    .hungers-collections__layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-inline: 1.6rem;
+    }
+
+    .hungers-collections__intro { min-height: 0; padding: 0; }
+    .hungers-collections__heading { max-width: 28rem; }
+    .hungers-collections__link { margin-top: 1.6rem; }
+    .hungers-collections__track { margin-right: -1.6rem; }
+
+    .hungers-collections__slide {
+      width: min(78vw, 30rem);
+      flex-basis: min(78vw, 30rem);
+    }
+
+    .hungers-collections__arrow { display: none; }
+    .hungers-collections__card-title { font-size: 2rem; }
+  }
+</style>
+
+<script>
+  if (!customElements.get('hungers-collections')) {
+    customElements.define('hungers-collections', class HungersCollections extends HTMLElement {
+      connectedCallback() {
+        this.track = this.querySelector('[data-hc-track]');
+        this.previousButton = this.querySelector('[data-hc-previous]');
+        this.nextButton = this.querySelector('[data-hc-next]');
+        if (!this.track || !this.previousButton || !this.nextButton) return;
+        this.previousButton.addEventListener('click', () => this.move(-1));
+        this.nextButton.addEventListener('click', () => this.move(1));
+        this.track.addEventListener('scroll', () => this.updateButtons(), { passive: true });
+        this.track.addEventListener('pointerdown', (event) => this.startDrag(event));
+        this.track.addEventListener('pointermove', (event) => this.drag(event));
+        this.track.addEventListener('pointerup', (event) => this.endDrag(event));
+        this.track.addEventListener('pointercancel', (event) => this.endDrag(event));
+        this.track.addEventListener('dragstart', (event) => event.preventDefault());
+        this.track.addEventListener('click', (event) => {
+          if (!this.suppressClick) return;
+          event.preventDefault();
+          event.stopPropagation();
+          this.suppressClick = false;
+        }, true);
+        window.addEventListener('resize', () => this.updateButtons(), { passive: true });
+        requestAnimationFrame(() => this.updateButtons());
+      }
+
+      move(direction) {
+        const slide = this.track.querySelector('.hungers-collections__slide');
+        if (!slide) return;
+        const gap = parseFloat(getComputedStyle(this.track).gap) || 0;
+        this.track.scrollBy({ left: direction * (slide.getBoundingClientRect().width + gap), behavior: 'smooth' });
+      }
+
+      startDrag(event) {
+        if (event.pointerType !== 'mouse' || event.button !== 0) return;
+        this.pointerId = event.pointerId;
+        this.dragStartX = event.clientX;
+        this.dragStartScroll = this.track.scrollLeft;
+        this.hasDragged = false;
+      }
+
+      drag(event) {
+        if (event.pointerId !== this.pointerId) return;
+        const distance = event.clientX - this.dragStartX;
+        if (!this.hasDragged && Math.abs(distance) > 4) {
+          this.hasDragged = true;
+          this.track.setPointerCapture(this.pointerId);
+          this.track.classList.add('is-dragging');
+        }
+        if (this.hasDragged) this.track.scrollLeft = this.dragStartScroll - distance;
+      }
+
+      endDrag(event) {
+        if (event.pointerId !== this.pointerId) return;
+        if (this.hasDragged) {
+          this.suppressClick = true;
+          if (this.track.hasPointerCapture(this.pointerId)) this.track.releasePointerCapture(this.pointerId);
+          setTimeout(() => { this.suppressClick = false; }, 0);
+        }
+        this.track.classList.remove('is-dragging');
+        this.pointerId = null;
+      }
+
+      updateButtons() {
+        const maximum = Math.max(0, this.track.scrollWidth - this.track.clientWidth);
+        this.previousButton.disabled = this.track.scrollLeft <= 2;
+        this.nextButton.disabled = this.track.scrollLeft >= maximum - 2 || maximum <= 2;
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Hungers Collections",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Discover<br><em>Non Toxic</em><br>Living</p>"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "default": "SHOP ALL"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "square", "label": "Square" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "min": 180,
+      "max": 360,
+      "step": 10,
+      "unit": "px",
+      "label": "Desktop card width",
+      "default": 270
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between cards",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop heading size",
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 44,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile heading size",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Heading and link",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Card title",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "label": "Image overlay opacity",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection card",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Custom title"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Hungers Collections",
+      "category": "Custom Sections",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}

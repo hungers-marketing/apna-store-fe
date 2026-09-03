@@ -1,12 +1,16 @@
 {{ 'section-image-banner.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.image_height == 'adapt' and section.settings.image != blank -%}
+{%- liquid
+  assign desktop_banner_image = section.settings.image | default: section.settings.mobile_image
+  assign mobile_banner_image = section.settings.mobile_image | default: section.settings.image
+-%}
+{%- if section.settings.image_height == 'adapt' and desktop_banner_image != blank -%}
   {%- style -%}
     @media screen and (max-width: 749px) {
       #Banner-{{ section.id }}::before,
       #Banner-{{ section.id }} .banner__media::before,
       #Banner-{{ section.id }}:not(.banner--mobile-bottom) .banner__content::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        padding-bottom: {{ 1 | divided_by: mobile_banner_image.aspect_ratio | times: 100 }}%;
         content: '';
         display: block;
       }
@@ -15,7 +19,7 @@
     @media screen and (min-width: 750px) {
       #Banner-{{ section.id }}::before,
       #Banner-{{ section.id }} .banner__media::before {
-        padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;
+        padding-bottom: {{ 1 | divided_by: desktop_banner_image.aspect_ratio | times: 100 }}%;
         content: '';
         display: block;
       }
@@ -26,6 +30,17 @@
 {%- style -%}
   #Banner-{{ section.id }}::after {
     opacity: {{ section.settings.image_overlay_opacity | divided_by: 100.0 }};
+  }
+
+  #Banner-{{ section.id }} {
+    --banner-content-width: {{ section.settings.content_width }}px;
+    --banner-content-x: {{ section.settings.content_horizontal_offset }}px;
+    --banner-content-y: {{ section.settings.content_vertical_offset }}px;
+    --banner-mobile-content-x: {{ section.settings.mobile_horizontal_offset }}px;
+    --banner-mobile-content-y: {{ section.settings.mobile_vertical_offset }}px;
+    --banner-button-hover-background: {{ section.settings.button_hover_background }};
+    --banner-button-hover-text: {{ section.settings.button_hover_text }};
+    --banner-button-hover-border: {{ section.settings.button_hover_border }};
   }
 {%- endstyle -%}
 
@@ -51,14 +66,16 @@
   endif
 -%}
 
-<div
-  id="Banner-{{ section.id }}"
-  class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.stack_images_on_mobile and section.settings.image != blank and section.settings.image_2 != blank %} banner--stacked{% endif %}{% if section.settings.image_height == 'adapt' and section.settings.image != blank %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
->
-  {%- if section.settings.image != blank -%}
-    <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+<div class="rounded-section rounded-section--hero">
+  <div class="rounded-section__inner rounded-section__inner--media color-{{ section.settings.color_scheme }} gradient">
+    <div
+      id="Banner-{{ section.id }}"
+      class="banner banner--content-align-{{ section.settings.desktop_content_alignment }} banner--content-align-mobile-{{ section.settings.mobile_content_alignment }} banner--{{ section.settings.image_height }}{% if section.settings.stack_images_on_mobile and desktop_banner_image != blank and section.settings.image_2 != blank %} banner--stacked{% endif %}{% if section.settings.image_height == 'adapt' and desktop_banner_image != blank %} banner--adapt{% endif %}{% if section.settings.show_text_below %} banner--mobile-bottom{%- endif -%}{% if section.settings.show_text_box == false %} banner--desktop-transparent{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+    >
+  {%- if desktop_banner_image != blank -%}
+    <div class="banner__media media{% if desktop_banner_image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       {%- liquid
-        assign image_height = section.settings.image.width | divided_by: section.settings.image.aspect_ratio
+        assign image_height = desktop_banner_image.width | divided_by: desktop_banner_image.aspect_ratio
         if section.settings.image_2 != blank
           assign image_class = 'banner__media-image-half'
         endif
@@ -70,17 +87,38 @@
           assign sizes = full_width
         endif
       -%}
-      {{
-        section.settings.image
-        | image_url: width: 3840
-        | image_tag:
-          width: section.settings.image.width,
-          height: image_height,
-          class: image_class,
-          sizes: sizes,
-          widths: widths,
-          fetchpriority: fetch_priority
-      }}
+      {%- if section.settings.mobile_image != blank -%}
+        <picture class="banner__picture">
+          <source
+            media="(max-width: 749px)"
+            sizes="100vw"
+            srcset="{{ mobile_banner_image | image_url: width: 375 }} 375w, {{ mobile_banner_image | image_url: width: 550 }} 550w, {{ mobile_banner_image | image_url: width: 750 }} 750w, {{ mobile_banner_image | image_url: width: 1100 }} 1100w"
+          >
+          {{
+            desktop_banner_image
+            | image_url: width: 3840
+            | image_tag:
+              width: desktop_banner_image.width,
+              height: image_height,
+              class: image_class,
+              sizes: sizes,
+              widths: widths,
+              fetchpriority: fetch_priority
+          }}
+        </picture>
+      {%- else -%}
+        {{
+          desktop_banner_image
+          | image_url: width: 3840
+          | image_tag:
+            width: desktop_banner_image.width,
+            height: image_height,
+            class: image_class,
+            sizes: sizes,
+            widths: widths,
+            fetchpriority: fetch_priority
+        }}
+      {%- endif -%}
     </div>
   {%- elsif section.settings.image_2 == blank -%}
     <div class="banner__media media{% if section.settings.image == blank and section.settings.image_2 == blank %} placeholder{% endif %}{% if section.settings.image_2 != blank %} banner__media-half{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
@@ -115,24 +153,32 @@
       }}
     </div>
   {%- endif -%}
-  <div class="banner__content banner__content--{{ section.settings.desktop_content_position }} page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+  <div class="banner__content banner__content--{{ section.settings.desktop_content_position }} banner__content--mobile-{{ section.settings.mobile_content_position }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
     <div class="banner__box content-container content-container--full-width-mobile color-{{ section.settings.color_scheme }} gradient">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'heading' -%}
-            <h2
-              class="banner__heading inline-richtext {{ block.settings.heading_size }}"
+            {%- liquid
+              assign banner_heading_tag = 'h2'
+              if request.page_type == 'index' and section.index == 1
+                assign banner_heading_tag = 'h1'
+              endif
+            -%}
+            <{{ banner_heading_tag }}
+              class="banner__heading inline-richtext"
+              style="--banner-heading-size-desktop: {{ block.settings.font_size_desktop }}px; --banner-heading-size-mobile: {{ block.settings.font_size_mobile }}px;"
               {{ block.shopify_attributes }}
             >
               {{ block.settings.heading }}
-            </h2>
+            </{{ banner_heading_tag }}>
           {%- when 'text' -%}
-            <div class="banner__text rte {{ block.settings.text_style }}" {{ block.shopify_attributes }}>
+            <div class="banner__text rte {{ block.settings.text_style }}" style="--banner-text-size-desktop: {{ block.settings.font_size_desktop }}px; --banner-text-size-mobile: {{ block.settings.font_size_mobile }}px;" {{ block.shopify_attributes }}>
               <p>{{ block.settings.text }}</p>
             </div>
           {%- when 'buttons' -%}
             <div
               class="banner__buttons{% if block.settings.button_label_1 != blank and block.settings.button_label_2 != blank %} banner__buttons--multiple{% endif %}"
+              style="--banner-button-size-desktop: {{ block.settings.font_size_desktop }}px; --banner-button-size-mobile: {{ block.settings.font_size_mobile }}px;"
               {{ block.shopify_attributes }}
             >
               {%- if block.settings.button_label_1 != blank -%}
@@ -164,6 +210,8 @@
       {%- endfor -%}
     </div>
   </div>
+    </div>
+  </div>
 </div>
 
 {% schema %}
@@ -178,7 +226,12 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "t:sections.image-banner.settings.image.label"
+      "label": "Desktop image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
     },
     {
       "type": "image_picker",
@@ -312,6 +365,40 @@
       "label": "t:sections.image-banner.settings.desktop_content_alignment.label"
     },
     {
+      "type": "header",
+      "content": "Content size and edge spacing"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 200,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "label": "Maximum content width",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "content_horizontal_offset",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal edge spacing",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "content_vertical_offset",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Vertical edge spacing",
+      "default": 24
+    },
+    {
       "type": "checkbox",
       "id": "show_text_box",
       "default": true,
@@ -322,6 +409,28 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Button hover"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Hover text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Hover border",
+      "default": "#FFFFFF"
     },
     {
       "type": "header",
@@ -350,13 +459,50 @@
           "label": "t:sections.image-banner.settings.mobile_content_alignment.options__3.label"
         }
       ],
-      "default": "center",
+      "default": "right",
       "label": "t:sections.image-banner.settings.mobile_content_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_position",
+      "label": "Mobile content position",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top center" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-left", "label": "Middle left" },
+        { "value": "middle-center", "label": "Middle center" },
+        { "value": "middle-right", "label": "Middle right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom center" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ],
+      "default": "bottom-right"
+    },
+    {
+      "type": "range",
+      "id": "mobile_horizontal_offset",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile horizontal edge spacing",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "mobile_vertical_offset",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile vertical edge spacing",
+      "default": 16
     },
     {
       "type": "checkbox",
       "id": "show_text_below",
-      "default": true,
+      "default": false,
       "label": "t:sections.image-banner.settings.show_text_below.label"
     }
   ],
@@ -373,32 +519,24 @@
           "label": "t:sections.image-banner.blocks.heading.settings.heading.label"
         },
         {
-          "type": "select",
-          "id": "heading_size",
-          "options": [
-            {
-              "value": "h2",
-              "label": "t:sections.all.heading_size.options__1.label"
-            },
-            {
-              "value": "h1",
-              "label": "t:sections.all.heading_size.options__2.label"
-            },
-            {
-              "value": "h0",
-              "label": "t:sections.all.heading_size.options__3.label"
-            },
-            {
-              "value": "hxl",
-              "label": "t:sections.all.heading_size.options__4.label"
-            },
-            {
-              "value": "hxxl",
-              "label": "t:sections.all.heading_size.options__5.label"
-            }
-          ],
-          "default": "h1",
-          "label": "t:sections.all.heading_size.label"
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 16,
+          "max": 100,
+          "step": 2,
+          "unit": "px",
+          "label": "Desktop font size",
+          "default": 48
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 14,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "label": "Mobile font size",
+          "default": 30
         }
       ]
     },
@@ -432,6 +570,26 @@
           ],
           "default": "body",
           "label": "t:sections.image-banner.blocks.text.settings.text_style.label"
+        },
+        {
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 12,
+          "max": 40,
+          "step": 1,
+          "unit": "px",
+          "label": "Desktop font size",
+          "default": 18
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 10,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile font size",
+          "default": 15
         }
       ]
     },
@@ -483,6 +641,30 @@
           "id": "button_style_secondary_2",
           "default": false,
           "label": "t:sections.image-banner.blocks.buttons.settings.button_style_secondary_2.label"
+        },
+        {
+          "type": "header",
+          "content": "Button typography"
+        },
+        {
+          "type": "range",
+          "id": "font_size_desktop",
+          "min": 10,
+          "max": 28,
+          "step": 1,
+          "unit": "px",
+          "label": "Desktop font size",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "font_size_mobile",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Mobile font size",
+          "default": 14
         }
       ]
     }

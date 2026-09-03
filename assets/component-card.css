@@ -593,3 +593,21 @@
     clip-path: polygon(var(--shape--blob-5));
   }
 }
+
+/* Custom Typography via Variables */
+.card__heading {
+  font-size: var(--card-title-size-mobile, calc(var(--font-heading-scale) * 1.5rem));
+}
+.card__badge .badge {
+  font-size: var(--card-badge-size-mobile, 1.2rem);
+}
+
+@media screen and (min-width: 750px) {
+  .card__heading {
+    font-size: var(--card-title-size-desktop, calc(var(--font-heading-scale) * 1.7rem));
+  }
+  .card__badge .badge {
+    font-size: var(--card-badge-size-desktop, 1.3rem);
+  }
+}
+

@@ -393,6 +393,7 @@
       "view_addresses": "Adressen bekijken",
       "return": "Terug naar Accountgegevens"
     },
+    "account_fallback": "Account",
     "activate_account": {
       "title": "Account activeren",
       "subtext": "Maak je wachtwoord aan om je account te activeren.",

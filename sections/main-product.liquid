@@ -15,6 +15,7 @@
   {{ 'component-slider.css' | asset_url | stylesheet_tag }}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
   {{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+  {{ 'product-reference-layout.css' | asset_url | stylesheet_tag }}
 
   {% unless product.has_only_default_variant %}
     {{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
@@ -26,6 +27,19 @@
   {%- endif -%}
 
   {%- style -%}
+    {{ section.settings.product_title_font | font_face: font_display: 'swap' }}
+
+    #MainProduct-{{ section.id }} {
+      --product-title-font: {{ section.settings.product_title_font.family }}, {{ section.settings.product_title_font.fallback_families }};
+      --product-title-font-style: {{ section.settings.product_title_font.style }};
+      --product-title-font-weight: {{ section.settings.product_title_font.weight }};
+      --product-title-size: {{ section.settings.product_title_size }}px;
+      --product-panel-radius: {{ section.settings.panel_radius }}px;
+      --product-panel-height: {{ section.settings.panel_height }}px;
+      --product-panel-gap: {{ section.settings.panel_gap }}px;
+      --product-panel-half-gap: {{ section.settings.panel_gap | divided_by: 2.0 }}px;
+    }
+
     .section-{{ section.id }}-padding {
       padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
       padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
@@ -74,8 +88,8 @@
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
   <product-component view-event-payload="{{ product | standard_event_data: 'view', context: 'page' | escape }}">
-    <div class="page-width">
-      <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+    <div class="{% if section.settings.enable_reference_layout or section.settings.full_width %}product-page-full-width{% else %}page-width{% endif %}">
+      <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }}{% if section.settings.enable_reference_layout %} product--reference-layout{% endif %} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
         <div class="grid__item product__media-wrapper">
           {% render 'product-media-gallery', variant_images: variant_images %}
         </div>
@@ -118,20 +132,6 @@
                   {%- if product.quantity_price_breaks_configured? -%}
                     <div class="volume-pricing-note" id="Volume-Note-{{ section.id }}">
                       <span>{{ 'products.product.volume_pricing.note' | t }}</span>
-                    </div>
-                  {%- endif -%}
-                  {%- if cart.taxes_included or cart.duties_included or shop.shipping_policy.body != blank -%}
-                    <div class="product__tax caption rte">
-                      {%- if cart.duties_included and cart.taxes_included -%}
-                        {{ 'products.product.duties_and_taxes_included' | t }}
-                      {%- elsif cart.taxes_included -%}
-                        {{ 'products.product.taxes_included' | t }}
-                      {%- elsif cart.duties_included -%}
-                        {{ 'products.product.duties_included' | t }}
-                      {%- endif -%}
-                      {%- if shop.shipping_policy.body != blank -%}
-                        {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
-                      {%- endif -%}
                     </div>
                   {%- endif -%}
                   <div {{ block.shopify_attributes }}>
@@ -596,12 +596,10 @@
                                   {% endif %}
                                 >
                                   <ul class="list-unstyled" role="list">
-                                    {% comment %}theme-check-disable UndefinedObject{% endcomment %}
                                     {%- for product in recommendations.products
                                       limit: block.settings.products_per_page
                                       offset: continue
                                     -%}
-                                    {% comment %}theme-check-enable UndefinedObject{% endcomment %}
                                       <li>
                                         {%- if block.settings.enable_quick_add -%}
                                           {% assign quick_add = 'standard' %}
@@ -688,6 +686,62 @@
                       <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
                     {%- endif -%}
                   </product-recommendations>
+                {%- when 'buy_together' -%}
+                  {%- if block.settings.products != blank -%}
+                    <buy-together-tabs class="product__buy-together quick-add-hidden" {{ block.shopify_attributes }}>
+                      <h2 class="{{ block.settings.heading_size }} product__buy-together-heading">{{ block.settings.heading | escape }}</h2>
+                      <div class="product__buy-together-tabs" role="tablist" aria-label="{{ block.settings.heading | escape }}">
+                        {%- for related_product in block.settings.products -%}
+                          <button
+                            id="BuyTogetherTab-{{ block.id }}-{{ forloop.index }}"
+                            class="product__buy-together-tab"
+                            type="button"
+                            role="tab"
+                            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                            aria-controls="BuyTogetherPanel-{{ block.id }}-{{ forloop.index }}"
+                            tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+                            data-buy-together-tab
+                          >
+                            {{- related_product.title | escape -}}
+                          </button>
+                        {%- endfor -%}
+                      </div>
+                      <ul class="product__buy-together-list list-unstyled" role="list">
+                        {%- for related_product in block.settings.products -%}
+                          <li
+                            id="BuyTogetherPanel-{{ block.id }}-{{ forloop.index }}"
+                            class="product__buy-together-item{% if forloop.first %} is-active{% endif %}"
+                            role="tabpanel"
+                            aria-labelledby="BuyTogetherTab-{{ block.id }}-{{ forloop.index }}"
+                            data-buy-together-panel
+                          >
+                            {% render 'card-product',
+                              card_product: related_product,
+                              media_aspect_ratio: 'square',
+                              show_secondary_image: false,
+                              show_vendor: false,
+                              show_rating: false,
+                              lazy_load: true,
+                              quick_add: 'standard',
+                              section_id: section.id,
+                              horizontal_class: true,
+                              horizontal_quick_add: true,
+                              buy_together_card: true
+                            %}
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </buy-together-tabs>
+                    {{ 'component-card.css' | asset_url | stylesheet_tag }}
+                    {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+                    <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+                    <script src="{{ 'buy-together-tabs.js' | asset_url }}" defer="defer"></script>
+                  {%- elsif request.design_mode -%}
+                    <div class="product__buy-together product__buy-together--empty" {{ block.shopify_attributes }}>
+                      <h2 class="{{ block.settings.heading_size }} product__buy-together-heading">{{ block.settings.heading | escape }}</h2>
+                      <p>Select products in this block to show them here.</p>
+                    </div>
+                  {%- endif -%}
                 {%- when 'icon-with-text' -%}
                   {% render 'icon-with-text', block: block %}
               {%- endcase -%}
@@ -740,13 +794,10 @@
         <script src="{{ 'product-model.js' | asset_url }}" defer></script>
       {%- endif -%}
 
+
       <script type="application/ld+json">
         {{ product | structured_data }}
       </script>
-
-      {%- if section.settings.enable_sticky_cart -%}
-        {% render 'sticky-add-to-cart', product: product, section_id: section.id %}
-      {%- endif -%}
     </div>
   </product-component>
 </product-info>
@@ -1521,6 +1572,36 @@
       ]
     },
     {
+      "type": "buy_together",
+      "name": "Buy together",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "default": "Buy it together",
+          "label": "Section heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            { "value": "h2", "label": "Small" },
+            { "value": "h1", "label": "Medium" },
+            { "value": "h0", "label": "Large" }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "product_list",
+          "id": "products",
+          "label": "Products",
+          "limit": 6
+        }
+      ]
+    },
+    {
       "type": "icon-with-text",
       "name": "t:sections.main-product.blocks.icon_with_text.name",
       "settings": [
@@ -2146,6 +2227,68 @@
   ],
   "settings": [
     {
+      "type": "header",
+      "content": "Reference layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_reference_layout",
+      "default": true,
+      "label": "Enable 50/50 panel layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": true,
+      "label": "Make product section full width"
+    },
+    {
+      "type": "font_picker",
+      "id": "product_title_font",
+      "default": "assistant_n7",
+      "label": "Product title font"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size",
+      "min": 32,
+      "max": 96,
+      "step": 2,
+      "unit": "px",
+      "default": 64,
+      "label": "Product title size"
+    },
+    {
+      "type": "range",
+      "id": "panel_height",
+      "min": 520,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 700,
+      "label": "Desktop panel height"
+    },
+    {
+      "type": "range",
+      "id": "panel_gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24,
+      "label": "Gap between panels"
+    },
+    {
+      "type": "range",
+      "id": "panel_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18,
+      "label": "Panel corner radius"
+    },
+    {
       "type": "checkbox",
       "id": "enable_sticky_info",
       "default": true,
@@ -2294,12 +2437,6 @@
       "id": "enable_video_looping",
       "default": false,
       "label": "t:sections.main-product.settings.enable_video_looping.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky_cart",
-      "default": true,
-      "label": "Enable sticky add to cart bar"
     },
     {
       "type": "header",

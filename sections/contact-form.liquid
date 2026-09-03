@@ -1,4 +1,5 @@
 {{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'contact-form-upload.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -15,7 +16,10 @@
 {%- endstyle -%}
 
 <div class="color-{{ section.settings.color_scheme }} gradient">
-  <div class="contact page-width page-width--narrow section-{{ section.id }}-padding">
+  <div
+    class="contact contact--support-form page-width section-{{ section.id }}-padding"
+    style="--contact-form-width: {{ section.settings.form_width }}px; --contact-field-height: {{ section.settings.field_height }}px; --contact-field-radius: {{ section.settings.field_radius }}px;"
+  >
     {%- if section.settings.heading != blank -%}
       <h2 class="title title-wrapper--no-top-margin inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         {{ section.settings.heading }}
@@ -29,7 +33,7 @@
         assign contact_form_class = 'isolate scroll-trigger animate--slide-in'
       endif
     -%}
-    {%- form 'contact', id: 'ContactForm', class: contact_form_class -%}
+    {%- form 'contact', id: 'ContactForm', class: contact_form_class, enctype: 'multipart/form-data' -%}
       {%- if form.posted_successfully? -%}
         <h2 class="form-status form-status-list form__message" tabindex="-1" autofocus>
           {{- 'icon-success.svg' | inline_asset_content -}}
@@ -51,25 +55,28 @@
           </li>
         </ul>
       {%- endif -%}
-      <div class="contact__fields">
-        <div class="field">
+      <div class="contact-support__fields">
+        <div class="contact-support__field">
+          <label class="visually-hidden" for="ContactForm-name">First and Last Name</label>
           <input
-            class="field__input"
+            class="contact-support__input"
             autocomplete="name"
             type="text"
             id="ContactForm-name"
-            name="contact[{{ 'templates.contact.form.name' | t }}]"
+            name="contact[name]"
             value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
-            placeholder="{{ 'templates.contact.form.name' | t }}"
+            placeholder="First and Last Name*"
+            required
           >
-          <label class="field__label" for="ContactForm-name">{{ 'templates.contact.form.name' | t }}</label>
         </div>
-        <div class="field field--with-error">
+
+        <div class="contact-support__field field--with-error">
+          <label class="visually-hidden" for="ContactForm-email">Email</label>
           <input
             autocomplete="email"
             type="email"
             id="ContactForm-email"
-            class="field__input"
+            class="contact-support__input"
             name="contact[email]"
             spellcheck="false"
             autocapitalize="off"
@@ -79,56 +86,85 @@
               aria-invalid="true"
               aria-describedby="ContactForm-email-error"
             {% endif %}
-            placeholder="{{ 'templates.contact.form.email' | t }}"
-          >
-          <label class="field__label" for="ContactForm-email">
-            {{- 'templates.contact.form.email' | t }}
-            <span aria-hidden="true">*</span></label
+            placeholder="Email*"
+            required
           >
           {%- if form.errors contains 'email' -%}
             <small class="contact__field-error" id="ContactForm-email-error">
               <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
               <span class="form__message">
-                <span class="svg-wrapper">
-                  {{- 'icon-error.svg' | inline_asset_content -}}
-                </span>
+                <span class="svg-wrapper">{{- 'icon-error.svg' | inline_asset_content -}}</span>
                 {{- form.errors.translated_fields.email | capitalize }}
                 {{ form.errors.messages.email -}}
               </span>
             </small>
           {%- endif -%}
         </div>
-      </div>
-      <div class="field">
-        <input
-          type="tel"
-          id="ContactForm-phone"
-          class="field__input"
-          autocomplete="tel"
-          name="contact[{{ 'templates.contact.form.phone' | t }}]"
-          pattern="[0-9\-]*"
-          value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
-          placeholder="{{ 'templates.contact.form.phone' | t }}"
-        >
-        <label class="field__label" for="ContactForm-phone">{{ 'templates.contact.form.phone' | t }}</label>
-      </div>
-      <div class="field">
-        <textarea
-          rows="10"
-          id="ContactForm-body"
-          class="text-area field__input"
-          name="contact[{{ 'templates.contact.form.comment' | t }}]"
-          placeholder="{{ 'templates.contact.form.comment' | t }}"
-        >
-          {{- form.body -}}
-        </textarea>
-        <label class="form__label field__label" for="ContactForm-body">
-          {{- 'templates.contact.form.comment' | t -}}
-        </label>
+
+        <div class="contact-support__field contact-support__select-wrap">
+          <label class="visually-hidden" for="ContactForm-reason">Contact Reason</label>
+          <select id="ContactForm-reason" class="contact-support__input contact-support__select" name="contact[Contact reason]" required>
+            <option value="" disabled selected>Contact Reason*</option>
+            {%- assign contact_reasons = section.settings.contact_reasons | newline_to_br | split: '<br />' -%}
+            {%- for reason in contact_reasons -%}
+              {%- assign clean_reason = reason | strip -%}
+              {%- if clean_reason != blank -%}
+                <option value="{{ clean_reason | escape }}">{{ clean_reason }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="contact-support__field">
+          <label class="visually-hidden" for="ContactForm-topic">Topic</label>
+          <input type="text" id="ContactForm-topic" class="contact-support__input" name="contact[Topic]" placeholder="Topic*" required>
+        </div>
+
+        <div class="contact-support__field">
+          <label class="visually-hidden" for="ContactForm-body">Tell us the details</label>
+          <textarea
+            rows="8"
+            id="ContactForm-body"
+            class="contact-support__input contact-support__textarea"
+            name="contact[body]"
+            placeholder="Tell us the details.*"
+            required
+          >{{- form.body -}}</textarea>
+        </div>
+
+        {%- if section.settings.show_upload -%}
+          <div class="contact-support__upload-group" data-contact-upload>
+            <p class="contact-support__upload-note">(Optional: 10 files max, total file size must be less than 50MB)</p>
+            <label class="contact-support__upload" for="ContactForm-files">
+              <span class="contact-support__upload-copy">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="4" width="18" height="16" rx="1.5" stroke="currentColor"/>
+                  <circle cx="8.5" cy="9" r="1.5" fill="currentColor"/>
+                  <path d="m5 18 4.5-4.5 3 3 2.5-2.5 4 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Drag or paste image here</span>
+              </span>
+              <span class="contact-support__upload-action">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 15V3m0 0L8 7m4-4 4 4M5 13v6h14v-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Upload
+              </span>
+              <input
+                id="ContactForm-files"
+                class="contact-support__file-input"
+                type="file"
+                name="contact[Attachments]"
+                accept="image/*,.pdf"
+                multiple
+                data-contact-file-input
+              >
+            </label>
+            <p class="contact-support__file-status" data-contact-file-status aria-live="polite"></p>
+          </div>
+        {%- endif -%}
       </div>
       <div class="contact__button">
         <button type="submit" class="button">
-          {{ 'templates.contact.form.send' | t }}
+          SUBMIT
         </button>
       </div>
     {%- endform -%}
@@ -183,6 +219,52 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Form style"
+    },
+    {
+      "type": "range",
+      "id": "form_width",
+      "min": 400,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "label": "Form width",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "field_height",
+      "min": 44,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Field height",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "field_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Field corner radius",
+      "default": 12
+    },
+    {
+      "type": "textarea",
+      "id": "contact_reasons",
+      "label": "Contact reasons (one per line)",
+      "default": "Order status\nCancel or modify an order\nReturns or exchanges\nMy order is missing\nMy order arrived damaged\nIssue with my product\nShipping questions\nProduct questions\nPartnerships / collaboration\nWholesale requests\nOther / general inquiry"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_upload",
+      "label": "Show file upload",
+      "default": true
     },
     {
       "type": "header",

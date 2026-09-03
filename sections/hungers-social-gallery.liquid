@@ -1,0 +1,567 @@
+{% comment %} Hungers Social Gallery {% endcomment %}
+
+{%- liquid
+  assign social_url = section.settings.social_link | default: settings.social_instagram_link | default: routes.root_url
+  assign gallery_ratio = '1 / 1'
+  case section.settings.image_ratio
+    when 'portrait'
+      assign gallery_ratio = '4 / 5'
+    when 'landscape'
+      assign gallery_ratio = '4 / 3'
+  endcase
+-%}
+
+{%- style -%}
+  #HungersSocialGallery-{{ section.id }} {
+    --hsg-background: {{ section.settings.background_color }};
+    --hsg-text: {{ section.settings.text_color }};
+    --hsg-button-background: {{ section.settings.button_background }};
+    --hsg-button-text: {{ section.settings.button_text_color }};
+    --hsg-card-width: {{ section.settings.card_width }}px;
+    --hsg-mobile-card-width: {{ section.settings.mobile_card_width }}vw;
+    --hsg-gap: {{ section.settings.card_gap }}px;
+    --hsg-ratio: {{ gallery_ratio }};
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round }}px;
+    color: var(--hsg-text);
+    background: var(--hsg-background);
+  }
+
+  #HungersSocialGallery-{{ section.id }} .hungers-social-gallery__title {
+    font-size: {{ section.settings.heading_size_mobile }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    #HungersSocialGallery-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+
+    #HungersSocialGallery-{{ section.id }} .hungers-social-gallery__title {
+      font-size: {{ section.settings.heading_size_desktop }}px;
+    }
+  }
+{%- endstyle -%}
+
+<hungers-social-gallery id="HungersSocialGallery-{{ section.id }}" class="hungers-social-gallery">
+  <div class="hungers-social-gallery__inner">
+    <div class="hungers-social-gallery__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="hungers-social-gallery__title">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank -%}
+        <a
+          class="hungers-social-gallery__social-link"
+          href="{{ social_url }}"
+          {% if section.settings.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="hungers-social-gallery__viewport">
+      <ul class="hungers-social-gallery__track list-unstyled" role="list" data-social-track>
+        {%- for block in section.blocks -%}
+          {%- assign item_url = block.settings.link | default: social_url -%}
+          <li class="hungers-social-gallery__slide" {{ block.shopify_attributes }}>
+            <a
+              class="hungers-social-gallery__card"
+              href="{{ item_url }}"
+              {% if section.settings.open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+              aria-label="{{ block.settings.alt_text | default: section.settings.button_label | escape }}"
+            >
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '320, 480, 640, 800, 1000, 1200',
+                    sizes: '(min-width: 990px) 420px, 82vw',
+                    alt: block.settings.alt_text
+                }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    <div class="hungers-social-gallery__controls">
+      <div class="hungers-social-gallery__progress" aria-hidden="true">
+        <span data-social-progress></span>
+      </div>
+      <div class="hungers-social-gallery__buttons">
+        <button type="button" aria-label="Previous images" data-social-previous>
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </button>
+        <button type="button" aria-label="Next images" data-social-next>
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </button>
+      </div>
+    </div>
+  </div>
+</hungers-social-gallery>
+
+<style>
+  .hungers-social-gallery {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-card, 10px);
+  }
+
+  .hungers-social-gallery__inner {
+    width: 100%;
+    padding-inline: clamp(1.6rem, 2vw, 3rem);
+  }
+
+  .hungers-social-gallery__header {
+    display: flex;
+    min-height: 8.5rem;
+    padding-block: 0.4rem 2rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .hungers-social-gallery__title {
+    margin: 0;
+    color: inherit;
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .hungers-social-gallery__social-link {
+    display: inline-flex;
+    min-width: 23rem;
+    min-height: 3.6rem;
+    padding: 0.6rem 2.4rem;
+    align-items: center;
+    justify-content: center;
+    color: var(--hsg-button-text);
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    background: var(--hsg-button-background);
+    border: 0.1rem solid currentColor;
+    border-radius: var(--radius-pill, 999px);
+    transition: color 260ms ease, background-color 260ms ease;
+  }
+
+  .hungers-social-gallery__social-link:hover {
+    color: var(--hsg-button-background);
+    background: var(--hsg-button-text);
+  }
+
+  .hungers-social-gallery__viewport {
+    width: calc(100% + clamp(1.6rem, 2vw, 3rem));
+    overflow: hidden;
+  }
+
+  .hungers-social-gallery__track {
+    display: flex;
+    gap: var(--hsg-gap);
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    cursor: grab;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .hungers-social-gallery__track::-webkit-scrollbar { display: none; }
+
+  .hungers-social-gallery__track.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+    user-select: none;
+  }
+
+  .hungers-social-gallery__slide {
+    width: var(--hsg-card-width);
+    flex: 0 0 var(--hsg-card-width);
+    scroll-snap-align: start;
+  }
+
+  .hungers-social-gallery__card {
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--hsg-ratio);
+    overflow: hidden;
+    color: inherit;
+    background: rgba(var(--color-foreground), 0.04);
+    border-radius: calc(var(--radius-card, 10px) * 0.75);
+  }
+
+  .hungers-social-gallery__card img,
+  .hungers-social-gallery__card svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: transform 500ms ease;
+  }
+
+  .hungers-social-gallery__card:hover img { transform: scale(1.025); }
+
+  .hungers-social-gallery__controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3rem;
+    padding-top: 2.4rem;
+    align-items: center;
+  }
+
+  .hungers-social-gallery__progress {
+    position: relative;
+    height: 0.1rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--hsg-text), transparent 72%);
+  }
+
+  .hungers-social-gallery__progress span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    background: var(--hsg-text);
+    transform: scaleX(0.2);
+    transform-origin: left center;
+    transition: transform 120ms linear;
+  }
+
+  .hungers-social-gallery__buttons {
+    display: flex;
+    gap: 0.8rem;
+  }
+
+  .hungers-social-gallery__buttons button {
+    display: grid;
+    width: 3.7rem;
+    height: 3.7rem;
+    padding: 0;
+    place-items: center;
+    color: var(--hsg-text);
+    background: transparent;
+    border: 0.1rem solid currentColor;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .hungers-social-gallery__buttons button:disabled { opacity: 0.35; cursor: default; }
+  .hungers-social-gallery__buttons .icon { width: 1rem; }
+  .hungers-social-gallery__buttons button:first-child .icon { transform: rotate(90deg); }
+  .hungers-social-gallery__buttons button:last-child .icon { transform: rotate(-90deg); }
+
+  @media screen and (max-width: 749px) {
+    .hungers-social-gallery__header {
+      min-height: 0;
+      padding-bottom: 1.8rem;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .hungers-social-gallery__social-link {
+      min-width: 0;
+      min-height: 3.3rem;
+      padding-inline: 1.8rem;
+      font-size: 1.15rem;
+    }
+
+    .hungers-social-gallery__slide {
+      width: var(--hsg-mobile-card-width);
+      flex-basis: var(--hsg-mobile-card-width);
+    }
+
+    .hungers-social-gallery__controls {
+      gap: 1.5rem;
+      padding-top: 1.6rem;
+    }
+
+    .hungers-social-gallery__buttons button {
+      width: 3.3rem;
+      height: 3.3rem;
+    }
+  }
+</style>
+
+<script>
+  if (!customElements.get('hungers-social-gallery')) {
+    customElements.define('hungers-social-gallery', class HungersSocialGallery extends HTMLElement {
+      connectedCallback() {
+        this.track = this.querySelector('[data-social-track]');
+        this.previousButton = this.querySelector('[data-social-previous]');
+        this.nextButton = this.querySelector('[data-social-next]');
+        this.progress = this.querySelector('[data-social-progress]');
+        if (!this.track || !this.previousButton || !this.nextButton || !this.progress) return;
+
+        this.previousButton.addEventListener('click', () => this.move(-1));
+        this.nextButton.addEventListener('click', () => this.move(1));
+        this.track.addEventListener('scroll', () => this.update(), { passive: true });
+        this.track.addEventListener('pointerdown', (event) => this.startDrag(event));
+        this.track.addEventListener('pointermove', (event) => this.drag(event));
+        this.track.addEventListener('pointerup', (event) => this.endDrag(event));
+        this.track.addEventListener('pointercancel', (event) => this.endDrag(event));
+        this.track.addEventListener('dragstart', (event) => event.preventDefault());
+        this.track.addEventListener('click', (event) => {
+          if (!this.suppressClick) return;
+          event.preventDefault();
+          event.stopPropagation();
+          this.suppressClick = false;
+        }, true);
+        window.addEventListener('resize', () => this.update(), { passive: true });
+        requestAnimationFrame(() => this.update());
+      }
+
+      move(direction) {
+        const slide = this.track.querySelector('.hungers-social-gallery__slide');
+        if (!slide) return;
+        const gap = parseFloat(getComputedStyle(this.track).gap) || 0;
+        this.track.scrollBy({ left: direction * (slide.getBoundingClientRect().width + gap), behavior: 'smooth' });
+      }
+
+      startDrag(event) {
+        if (event.pointerType !== 'mouse' || event.button !== 0) return;
+        this.pointerId = event.pointerId;
+        this.dragStartX = event.clientX;
+        this.dragStartScroll = this.track.scrollLeft;
+        this.hasDragged = false;
+      }
+
+      drag(event) {
+        if (event.pointerId !== this.pointerId) return;
+        const distance = event.clientX - this.dragStartX;
+        if (!this.hasDragged && Math.abs(distance) > 4) {
+          this.hasDragged = true;
+          this.track.setPointerCapture(this.pointerId);
+          this.track.classList.add('is-dragging');
+        }
+        if (this.hasDragged) this.track.scrollLeft = this.dragStartScroll - distance;
+      }
+
+      endDrag(event) {
+        if (event.pointerId !== this.pointerId) return;
+        if (this.hasDragged) {
+          this.suppressClick = true;
+          if (this.track.hasPointerCapture(this.pointerId)) this.track.releasePointerCapture(this.pointerId);
+          setTimeout(() => { this.suppressClick = false; }, 0);
+        }
+        this.track.classList.remove('is-dragging');
+        this.pointerId = null;
+      }
+
+      update() {
+        const maximum = Math.max(0, this.track.scrollWidth - this.track.clientWidth);
+        const position = Math.max(0, this.track.scrollLeft);
+        const visibleRatio = Math.min(1, this.track.clientWidth / Math.max(this.track.scrollWidth, 1));
+        const travelRatio = maximum > 0 ? position / maximum : 1;
+        const progressScale = Math.min(1, visibleRatio + travelRatio * (1 - visibleRatio));
+        this.progress.style.transform = `scaleX(${progressScale})`;
+        this.previousButton.disabled = position <= 2;
+        this.nextButton.disabled = maximum <= 2 || position >= maximum - 2;
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Hungers Social Gallery",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Seole + you"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "FIND US ON SOCIAL"
+    },
+    {
+      "type": "url",
+      "id": "social_link",
+      "label": "Instagram link",
+      "info": "If empty, the global Instagram social link is used."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Open social links in a new tab",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Gallery layout"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "square", "label": "Square" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "min": 260,
+      "max": 520,
+      "step": 10,
+      "unit": "px",
+      "label": "Desktop image width",
+      "default": 420
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "min": 65,
+      "max": 92,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile image width",
+      "default": 82
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between images",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "label": "Desktop heading size",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "min": 20,
+      "max": 44,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile heading size",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f3f2ef"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text and controls",
+      "default": "#66635e"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button background",
+      "default": "#f3f2ef"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text and border",
+      "default": "#66635e"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Social image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Post link",
+          "info": "If empty, the section Instagram link is used."
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "Image description"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Hungers Social Gallery",
+      "category": "Custom Sections",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}
