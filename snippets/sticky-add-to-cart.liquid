@@ -1,0 +1,171 @@
+{% comment %}
+  Renders Sticky Add to Cart Bar for product page.
+  Accepts:
+  - product: {Object} Product object
+  - section_id: {String} Section ID
+{% endcomment %}
+
+{{ 'sticky-add-to-cart.css' | asset_url | stylesheet_tag }}
+
+<sticky-add-to-cart class="sticky-cart color-{{ section.settings.color_scheme | default: 'scheme-1' }} gradient" data-product-id="{{ product.id }}">
+  <div class="sticky-cart__inner page-width">
+    <div class="sticky-cart__product">
+      {%- if product.featured_media -%}
+        <div class="sticky-cart__image">
+          <img
+            src="{{ product.featured_media | image_url: width: 120 }}"
+            alt="{{ product.featured_media.alt | escape }}"
+            width="50"
+            height="50"
+            loading="lazy"
+          >
+        </div>
+      {%- endif -%}
+      <div class="sticky-cart__details">
+        <span class="sticky-cart__title">{{ product.title | escape }}</span>
+        <span class="sticky-cart__price" id="StickyCart-Price-{{ product.id }}">
+          {{ product.selected_or_first_available_variant.price | money }}
+        </span>
+      </div>
+    </div>
+
+    <div class="sticky-cart__actions">
+      <product-form class="product-form" data-hide-errors="false" data-section-id="{{ section_id }}">
+        {%- form 'product',
+          product,
+          id: 'sticky-product-form',
+          class: 'form sticky-cart__form',
+          novalidate: 'novalidate',
+          data-type: 'add-to-cart-form'
+        -%}
+          {%- unless product.has_only_default_variant -%}
+            <div class="sticky-cart__variant-select-wrapper select">
+              <select
+                name="id"
+                class="sticky-cart__variant-select select__select"
+                aria-label="Select variant"
+              >
+                {%- for variant in product.variants -%}
+                  <option
+                    value="{{ variant.id }}"
+                    data-price="{{ variant.price | money }}"
+                    {% if variant == product.selected_or_first_available_variant %}
+                      selected="selected"
+                    {% endif %}
+                    {% unless variant.available %}
+                      disabled="disabled"
+                    {% endunless %}
+                  >
+                    {{ variant.title }} - {{ variant.price | money }}
+                    {% unless variant.available %}
+                      ({{ 'products.product.sold_out' | t }})
+                    {% endunless %}
+                  </option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- else -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {%- endunless -%}
+
+          <button
+            type="submit"
+            name="add"
+            class="sticky-cart__button button button--primary"
+            {% if product.selected_or_first_available_variant.available == false %}
+              disabled
+            {% endif %}
+          >
+            <span class="sticky-cart__button-text">
+              {%- if product.selected_or_first_available_variant.available -%}
+                {{ 'products.product.add_to_cart' | t }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- endif -%}
+            </span>
+            {%- render 'loading-spinner' -%}
+          </button>
+        {%- endform -%}
+      </product-form>
+    </div>
+  </div>
+</sticky-add-to-cart>
+
+<script>
+  if (!customElements.get('sticky-add-to-cart')) {
+    customElements.define(
+      'sticky-add-to-cart',
+      class StickyAddToCart extends HTMLElement {
+        constructor() {
+          super();
+          this.select = this.querySelector('select[name="id"]');
+          this.priceEl = this.querySelector('[id^="StickyCart-Price-"]');
+          this.button = this.querySelector('button[type="submit"]');
+        }
+
+        connectedCallback() {
+          this.initObserver();
+          if (this.select) {
+            this.select.addEventListener('change', this.onVariantChange.bind(this));
+          }
+
+          document.addEventListener('variant:changed', (event) => {
+            if (event.detail && event.detail.variant) {
+              this.updateFromExternal(event.detail.variant);
+            }
+          });
+        }
+
+        initObserver() {
+          const targetBtn = document.querySelector('.product-form__submit, .product-form [name="add"]');
+          if (!targetBtn) return;
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  this.classList.remove('is-visible');
+                } else {
+                  if (entry.boundingClientRect.top < 0) {
+                    this.classList.add('is-visible');
+                  } else {
+                    this.classList.remove('is-visible');
+                  }
+                }
+              });
+            },
+            { threshold: 0 }
+          );
+
+          observer.observe(targetBtn);
+        }
+
+        onVariantChange(event) {
+          const selectedOption = this.select.options[this.select.selectedIndex];
+          if (selectedOption && this.priceEl) {
+            this.priceEl.textContent = selectedOption.dataset.price;
+          }
+        }
+
+        updateFromExternal(variant) {
+          if (this.select) {
+            this.select.value = variant.id;
+            if (this.priceEl) {
+              const opt = this.select.querySelector(`option[value="${variant.id}"]`);
+              if (opt && opt.dataset.price) this.priceEl.textContent = opt.dataset.price;
+            }
+          }
+          if (this.button) {
+            this.button.disabled = !variant.available;
+            const btnText = this.button.querySelector('.sticky-cart__button-text');
+            if (btnText) {
+              btnText.textContent = variant.available
+                ? (window.variantStrings?.addToCart || 'Add to cart')
+                : (window.variantStrings?.soldOut || 'Sold out');
+            }
+          }
+        }
+      }
+    );
+  }
+</script>

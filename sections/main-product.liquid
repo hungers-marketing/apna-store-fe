@@ -596,10 +596,12 @@
                                   {% endif %}
                                 >
                                   <ul class="list-unstyled" role="list">
+                                    {% comment %}theme-check-disable UndefinedObject{% endcomment %}
                                     {%- for product in recommendations.products
                                       limit: block.settings.products_per_page
                                       offset: continue
                                     -%}
+                                    {% comment %}theme-check-enable UndefinedObject{% endcomment %}
                                       <li>
                                         {%- if block.settings.enable_quick_add -%}
                                           {% assign quick_add = 'standard' %}
@@ -738,17 +740,13 @@
         <script src="{{ 'product-model.js' | asset_url }}" defer></script>
       {%- endif -%}
 
-      {%- liquid
-        if product.selected_or_first_available_variant.featured_media
-          assign seo_media = product.selected_or_first_available_variant.featured_media
-        else
-          assign seo_media = product.featured_media
-        endif
-      -%}
-
       <script type="application/ld+json">
         {{ product | structured_data }}
       </script>
+
+      {%- if section.settings.enable_sticky_cart -%}
+        {% render 'sticky-add-to-cart', product: product, section_id: section.id %}
+      {%- endif -%}
     </div>
   </product-component>
 </product-info>
@@ -2296,6 +2294,12 @@
       "id": "enable_video_looping",
       "default": false,
       "label": "t:sections.main-product.settings.enable_video_looping.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_cart",
+      "default": true,
+      "label": "Enable sticky add to cart bar"
     },
     {
       "type": "header",
