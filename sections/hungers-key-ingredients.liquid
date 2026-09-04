@@ -368,81 +368,109 @@
 
 <script>
   (() => {
-    const section = document.getElementById('HungersKeyIngredients-{{ section.id }}');
-    if (!section || section.dataset.initialized === 'true') return;
+    const initKeyIngredients = (root = document) => {
+      const section = root.id && root.id.startsWith('HungersKeyIngredients-') ? root : root.querySelector?.('#HungersKeyIngredients-{{ section.id }}');
+      if (!section || section.dataset.initialized === 'true') return;
 
-    const items = section.querySelectorAll('.hungers-key-ingredients__item');
-    const modal = section.querySelector('[data-ingredients-modal]');
-    const openModalButton = section.querySelector('[data-open-ingredients-modal]');
-    const closeModalButton = section.querySelector('[data-close-ingredients-modal]');
-    let modalTrigger = null;
+      const items = section.querySelectorAll('.hungers-key-ingredients__item');
+      const modal = section.querySelector('[data-ingredients-modal]');
+      const openModalButton = section.querySelector('[data-open-ingredients-modal]');
+      const closeModalButton = section.querySelector('[data-close-ingredients-modal]');
+      let modalTrigger = null;
 
-    const closeDescription = (item) => {
-      const description = item.querySelector('[data-ingredient-description]');
-      if (!description) return;
-      description.hidden = true;
-      item.setAttribute('aria-expanded', 'false');
-    };
+      const closeDescription = (item) => {
+        const description = item.querySelector('[data-ingredient-description]');
+        if (!description) return;
+        description.hidden = true;
+        item.setAttribute('aria-expanded', 'false');
+      };
 
-    const toggleDescription = (item) => {
-      const description = item.querySelector('[data-ingredient-description]');
-      if (!description) return;
-      const shouldOpen = description.hidden;
-      items.forEach((otherItem) => {
-        if (otherItem !== item) closeDescription(otherItem);
-      });
-      description.hidden = !shouldOpen;
-      item.setAttribute('aria-expanded', String(shouldOpen));
-    };
+      const toggleDescription = (item) => {
+        const description = item.querySelector('[data-ingredient-description]');
+        if (!description) return;
+        const shouldOpen = description.hidden;
+        items.forEach((otherItem) => {
+          if (otherItem !== item) closeDescription(otherItem);
+        });
+        description.hidden = !shouldOpen;
+        item.setAttribute('aria-expanded', String(shouldOpen));
+      };
 
-    items.forEach((item) => {
-      const toggle = item.querySelector('[data-toggle-description]');
-      const close = item.querySelector('[data-close-description]');
-      if (toggle) toggle.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toggleDescription(item);
-      });
-      if (close) close.addEventListener('click', (event) => {
-        event.stopPropagation();
-        closeDescription(item);
-      });
-      item.addEventListener('click', (event) => {
-        if (event.target.closest('a, button')) return;
-        toggleDescription(item);
-      });
-      item.addEventListener('keydown', (event) => {
-        if ((event.key === 'Enter' || event.key === ' ') && event.target === item) {
-          event.preventDefault();
+      items.forEach((item) => {
+        const toggle = item.querySelector('[data-toggle-description]');
+        const close = item.querySelector('[data-close-description]');
+        if (toggle) toggle.addEventListener('click', (event) => {
+          event.stopPropagation();
           toggleDescription(item);
+        });
+        if (close) close.addEventListener('click', (event) => {
+          event.stopPropagation();
+          closeDescription(item);
+        });
+        item.addEventListener('click', (event) => {
+          if (event.target.closest('a, button')) return;
+          toggleDescription(item);
+        });
+        item.addEventListener('keydown', (event) => {
+          if ((event.key === 'Enter' || event.key === ' ') && event.target === item) {
+            event.preventDefault();
+            toggleDescription(item);
+          }
+        });
+      });
+
+      const trapFocus = (event) => {
+        if (!modal || modal.hidden || event.key !== 'Tab') return;
+        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      };
+
+      const openModal = () => {
+        if (!modal) return;
+        modalTrigger = document.activeElement;
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        closeModalButton?.focus();
+        document.addEventListener('keydown', trapFocus);
+      };
+
+      const closeModal = () => {
+        if (!modal) return;
+        modal.hidden = true;
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', trapFocus);
+        modalTrigger?.focus();
+      };
+
+      openModalButton?.addEventListener('click', openModal);
+      closeModalButton?.addEventListener('click', closeModal);
+      modal?.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          if (modal && !modal.hidden) {
+            closeModal();
+          } else {
+            items.forEach((item) => closeDescription(item));
+          }
         }
       });
-    });
 
-    const openModal = () => {
-      if (!modal) return;
-      modalTrigger = document.activeElement;
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      closeModalButton?.focus();
+      section.dataset.initialized = 'true';
     };
 
-    const closeModal = () => {
-      if (!modal) return;
-      modal.hidden = true;
-      document.body.style.overflow = '';
-      modalTrigger?.focus();
-    };
-
-    openModalButton?.addEventListener('click', openModal);
-    closeModalButton?.addEventListener('click', closeModal);
-    modal?.addEventListener('click', (event) => {
-      if (event.target === modal) closeModal();
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && modal && !modal.hidden) closeModal();
-    });
-
-    section.dataset.initialized = 'true';
+    initKeyIngredients();
+    document.addEventListener('shopify:section:load', (event) => initKeyIngredients(event.target));
   })();
 </script>
 
@@ -521,7 +549,6 @@
   "presets": [
     {
       "name": "Hungers Key Ingredients",
-      "category": "Custom sections",
       "blocks": [
         { "type": "ingredient" },
         { "type": "ingredient" },

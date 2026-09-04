@@ -323,81 +323,86 @@
 
 <script>
   (() => {
-    const section = document.getElementById('HungersIngredients-{{ section.id }}');
-    if (!section || section.dataset.initialized === 'true') return;
+    const initIngredients = (root = document) => {
+      const section = root.id && root.id.startsWith('HungersIngredients-') ? root : root.querySelector?.('#HungersIngredients-{{ section.id }}');
+      if (!section || section.dataset.initialized === 'true') return;
 
-    const slider = section.querySelector('[data-ingredients-slider]');
-    const previous = section.querySelector('[data-ingredients-previous]');
-    const next = section.querySelector('[data-ingredients-next]');
-    const progress = section.querySelector('[data-ingredients-progress]');
-    if (!slider || !previous || !next) return;
+      const slider = section.querySelector('[data-ingredients-slider]');
+      const previous = section.querySelector('[data-ingredients-previous]');
+      const next = section.querySelector('[data-ingredients-next]');
+      const progress = section.querySelector('[data-ingredients-progress]');
+      if (!slider || !previous || !next) return;
 
-    const updateControls = () => {
-      const maxScroll = Math.max(0, slider.scrollWidth - slider.clientWidth);
-      const ratio = slider.scrollWidth > 0 ? Math.min(1, slider.clientWidth / slider.scrollWidth) : 1;
-      const thumbPercent = Math.max(8, ratio * 100);
-      const travelPercent = 100 - thumbPercent;
-      const scrollPercent = maxScroll > 0 ? slider.scrollLeft / maxScroll : 0;
+      const updateControls = () => {
+        const maxScroll = Math.max(0, slider.scrollWidth - slider.clientWidth);
+        const ratio = slider.scrollWidth > 0 ? Math.min(1, slider.clientWidth / slider.scrollWidth) : 1;
+        const thumbPercent = Math.max(8, ratio * 100);
+        const travelPercent = 100 - thumbPercent;
+        const scrollPercent = maxScroll > 0 ? slider.scrollLeft / maxScroll : 0;
 
-      previous.disabled = slider.scrollLeft <= 1;
-      next.disabled = slider.scrollLeft >= maxScroll - 1;
+        previous.disabled = slider.scrollLeft <= 1;
+        next.disabled = slider.scrollLeft >= maxScroll - 1;
 
-      if (progress) {
-        progress.style.width = `${thumbPercent}%`;
-        progress.style.left = `${scrollPercent * travelPercent}%`;
+        if (progress) {
+          progress.style.width = `${thumbPercent}%`;
+          progress.style.left = `${scrollPercent * travelPercent}%`;
+        }
+      };
+
+      const scrollByCard = (direction) => {
+        const card = slider.querySelector('.hungers-ingredients__card');
+        const styles = window.getComputedStyle(slider);
+        const gap = parseFloat(styles.columnGap || styles.gap) || 0;
+        const distance = card ? card.getBoundingClientRect().width + gap : slider.clientWidth * 0.8;
+        slider.scrollBy({ left: distance * direction, behavior: 'smooth' });
+      };
+
+      previous.addEventListener('click', () => scrollByCard(-1));
+      next.addEventListener('click', () => scrollByCard(1));
+      slider.addEventListener('scroll', updateControls, { passive: true });
+
+      let dragging = false;
+      let startX = 0;
+      let startScroll = 0;
+
+      slider.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'touch') return;
+        dragging = true;
+        startX = event.clientX;
+        startScroll = slider.scrollLeft;
+        slider.classList.add('is-dragging');
+        slider.setPointerCapture(event.pointerId);
+      });
+
+      slider.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        slider.scrollLeft = startScroll - (event.clientX - startX) * 1.2;
+      });
+
+      const stopDragging = (event) => {
+        if (!dragging) return;
+        dragging = false;
+        slider.classList.remove('is-dragging');
+        if (slider.hasPointerCapture(event.pointerId)) slider.releasePointerCapture(event.pointerId);
+      };
+
+      slider.addEventListener('pointerup', stopDragging);
+      slider.addEventListener('pointercancel', stopDragging);
+      slider.addEventListener('dragstart', (event) => event.preventDefault());
+
+      if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(updateControls);
+        observer.observe(slider);
+      } else {
+        window.addEventListener('resize', updateControls, { passive: true });
       }
+
+      updateControls();
+      section.dataset.initialized = 'true';
     };
 
-    const scrollByCard = (direction) => {
-      const card = slider.querySelector('.hungers-ingredients__card');
-      const styles = window.getComputedStyle(slider);
-      const gap = parseFloat(styles.columnGap || styles.gap) || 0;
-      const distance = card ? card.getBoundingClientRect().width + gap : slider.clientWidth * 0.8;
-      slider.scrollBy({ left: distance * direction, behavior: 'smooth' });
-    };
-
-    previous.addEventListener('click', () => scrollByCard(-1));
-    next.addEventListener('click', () => scrollByCard(1));
-    slider.addEventListener('scroll', updateControls, { passive: true });
-
-    let dragging = false;
-    let startX = 0;
-    let startScroll = 0;
-
-    slider.addEventListener('pointerdown', (event) => {
-      if (event.pointerType === 'touch') return;
-      dragging = true;
-      startX = event.clientX;
-      startScroll = slider.scrollLeft;
-      slider.classList.add('is-dragging');
-      slider.setPointerCapture(event.pointerId);
-    });
-
-    slider.addEventListener('pointermove', (event) => {
-      if (!dragging) return;
-      slider.scrollLeft = startScroll - (event.clientX - startX) * 1.2;
-    });
-
-    const stopDragging = (event) => {
-      if (!dragging) return;
-      dragging = false;
-      slider.classList.remove('is-dragging');
-      if (slider.hasPointerCapture(event.pointerId)) slider.releasePointerCapture(event.pointerId);
-    };
-
-    slider.addEventListener('pointerup', stopDragging);
-    slider.addEventListener('pointercancel', stopDragging);
-    slider.addEventListener('dragstart', (event) => event.preventDefault());
-
-    if ('ResizeObserver' in window) {
-      const observer = new ResizeObserver(updateControls);
-      observer.observe(slider);
-    } else {
-      window.addEventListener('resize', updateControls, { passive: true });
-    }
-
-    updateControls();
-    section.dataset.initialized = 'true';
+    initIngredients();
+    document.addEventListener('shopify:section:load', (event) => initIngredients(event.target));
   })();
 </script>
 
@@ -470,7 +475,6 @@
   "presets": [
     {
       "name": "Hungers Ingredients",
-      "category": "Custom sections",
       "blocks": [
         { "type": "ingredient" },
         { "type": "ingredient" },

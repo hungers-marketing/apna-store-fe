@@ -165,40 +165,45 @@
 
 <script>
   (() => {
-    const section = document.getElementById('HungersFaqs-{{ section.id }}');
-    if (!section || section.dataset.initialized === 'true') return;
+    const initFaqs = (root = document) => {
+      const section = root.id && root.id.startsWith('HungersFaqs-') ? root : root.querySelector?.('#HungersFaqs-{{ section.id }}');
+      if (!section || section.dataset.initialized === 'true') return;
 
-    const questions = section.querySelectorAll('.hungers-faqs__question');
+      const questions = section.querySelectorAll('.hungers-faqs__question');
 
-    const closeItem = (item) => {
-      const question = item.querySelector('.hungers-faqs__question');
-      const answer = item.querySelector('.hungers-faqs__answer');
-      item.classList.remove('is-active');
-      question.setAttribute('aria-expanded', 'false');
-      answer.hidden = true;
+      const closeItem = (item) => {
+        const question = item.querySelector('.hungers-faqs__question');
+        const answer = item.querySelector('.hungers-faqs__answer');
+        item.classList.remove('is-active');
+        question.setAttribute('aria-expanded', 'false');
+        answer.hidden = true;
+      };
+
+      questions.forEach((question) => {
+        question.addEventListener('click', () => {
+          const item = question.closest('.hungers-faqs__item');
+          const answer = item.querySelector('.hungers-faqs__answer');
+          const shouldOpen = question.getAttribute('aria-expanded') !== 'true';
+
+          section.querySelectorAll('.hungers-faqs__item.is-active').forEach((openItem) => {
+            if (openItem !== item) closeItem(openItem);
+          });
+
+          if (shouldOpen) {
+            item.classList.add('is-active');
+            question.setAttribute('aria-expanded', 'true');
+            answer.hidden = false;
+          } else {
+            closeItem(item);
+          }
+        });
+      });
+
+      section.dataset.initialized = 'true';
     };
 
-    questions.forEach((question) => {
-      question.addEventListener('click', () => {
-        const item = question.closest('.hungers-faqs__item');
-        const answer = item.querySelector('.hungers-faqs__answer');
-        const shouldOpen = question.getAttribute('aria-expanded') !== 'true';
-
-        section.querySelectorAll('.hungers-faqs__item.is-active').forEach((openItem) => {
-          if (openItem !== item) closeItem(openItem);
-        });
-
-        if (shouldOpen) {
-          item.classList.add('is-active');
-          question.setAttribute('aria-expanded', 'true');
-          answer.hidden = false;
-        } else {
-          closeItem(item);
-        }
-      });
-    });
-
-    section.dataset.initialized = 'true';
+    initFaqs();
+    document.addEventListener('shopify:section:load', (event) => initFaqs(event.target));
   })();
 </script>
 
@@ -268,7 +273,6 @@
   "presets": [
     {
       "name": "Hungers FAQs",
-      "category": "Custom sections",
       "blocks": [
         { "type": "faq" },
         { "type": "faq" },

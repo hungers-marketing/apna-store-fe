@@ -1,5 +1,5 @@
 (() => {
-  const loaderScript = document.currentScript;
+  const loaderScript = document.querySelector('script[data-disclosure-modal-src]') || document.currentScript;
   const desktopMedia = window.matchMedia('(min-width: 750px)');
 
   const loadDesktopSecondaryImages = () => {

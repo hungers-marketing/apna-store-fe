@@ -135,10 +135,11 @@
                   href="{{ card_product.url }}"
                   id="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }}"
                   class="full-unstyled-link"
+                  aria-label="{{ card_product.title | escape }}"
                   aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }}{% if card_product.available == false or card_product.compare_at_price > card_product.price %} NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}{% endif %}"
                 >
                   {%- if featured_collection_card -%}
-                    {{ featured_card_badge | escape }}
+                    {{ featured_card_badge | default: card_product.title | escape }}
                   {%- else -%}
                     {{ card_product.title | escape }}
                   {%- endif -%}

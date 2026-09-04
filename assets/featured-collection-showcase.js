@@ -90,16 +90,24 @@
     updateActiveDot();
   };
 
+  const getOrCreateCursor = () => {
+    let cursor = document.querySelector('.featured-showcase-swipe-cursor');
+    if (!cursor) {
+      cursor = document.createElement('span');
+      cursor.className = 'featured-showcase-swipe-cursor';
+      cursor.textContent = 'swipe';
+      cursor.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(cursor);
+    }
+    return cursor;
+  };
+
   const initSlider = (slider) => {
     initPagination(slider);
     if (slider.dataset.showcaseDragReady === 'true') return;
     slider.dataset.showcaseDragReady = 'true';
 
-    const cursor = document.createElement('span');
-    cursor.className = 'featured-showcase-swipe-cursor';
-    cursor.textContent = 'swipe';
-    cursor.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(cursor);
+    const cursor = getOrCreateCursor();
 
     let pointerId = null;
     let startX = 0;

@@ -28,9 +28,9 @@
   padding-right: 8.4rem;
 }
 
-.collection-showcase .facets__wrapper,
-.collection-showcase .mobile-facets__wrapper,
-.collection-showcase .active-facets-mobile,
+.collection-showcase .facets-wrapper--no-filters .facets__wrapper,
+.collection-showcase .facets-wrapper--no-filters .mobile-facets__wrapper,
+.collection-showcase .facets-wrapper--no-filters .active-facets-mobile,
 .collection-showcase .facets-container > .product-count {
   display: none !important;
 }

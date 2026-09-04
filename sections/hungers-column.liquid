@@ -231,49 +231,55 @@
 
 <script>
   (() => {
-    const section = document.getElementById('HungersColumn-{{ section.id }}');
-    if (!section || section.dataset.initialized === 'true') return;
+    const initColumn = (root = document) => {
+      const section = root.id && root.id.startsWith('HungersColumn-') ? root : root.querySelector?.('#HungersColumn-{{ section.id }}');
+      if (!section || section.dataset.initialized === 'true') return;
 
-    const items = section.querySelectorAll('.hungers-column__item-container');
-    const mainImage = section.querySelector('.hungers-column__main-image');
-    const mainHeading = section.querySelector('[data-main-heading]');
-    const mainDescription = section.querySelector('[data-main-description]');
-    let changeTimer;
+      const items = section.querySelectorAll('.hungers-column__item-container');
+      const mainImage = section.querySelector('.hungers-column__main-image');
+      const mainHeading = section.querySelector('[data-main-heading]');
+      const mainDescription = section.querySelector('[data-main-description]');
+      let changeTimer;
 
-    const changeContent = (item) => {
-      const image = item.dataset.image;
-      const heading = item.dataset.heading;
-      const description = item.querySelector('[data-description]');
+      const changeContent = (item) => {
+        const image = item.dataset.image;
+        const heading = item.dataset.heading;
+        const description = item.querySelector('[data-description]');
 
-      window.clearTimeout(changeTimer);
-      if (mainImage && image) mainImage.style.opacity = '0';
-      if (mainHeading) mainHeading.style.opacity = '0';
-      if (mainDescription) mainDescription.style.opacity = '0';
+        window.clearTimeout(changeTimer);
+        if (mainImage && image) mainImage.style.opacity = '0';
+        if (mainHeading) mainHeading.style.opacity = '0';
+        if (mainDescription) mainDescription.style.opacity = '0';
 
-      changeTimer = window.setTimeout(() => {
-        if (mainImage && image) {
-          mainImage.removeAttribute('srcset');
-          mainImage.src = image;
-          mainImage.style.opacity = '1';
-        }
-        if (mainHeading && heading) {
-          mainHeading.textContent = heading;
-          mainHeading.style.opacity = '1';
-        }
-        if (mainDescription && description) {
-          mainDescription.innerHTML = description.innerHTML;
-          mainDescription.style.opacity = '1';
-        }
-        items.forEach((entry) => entry.classList.toggle('is-active', entry === item));
-      }, 300);
+        changeTimer = window.setTimeout(() => {
+          if (mainImage && image) {
+            mainImage.removeAttribute('srcset');
+            mainImage.src = image;
+            if (heading) mainImage.alt = heading;
+            mainImage.style.opacity = '1';
+          }
+          if (mainHeading && heading) {
+            mainHeading.textContent = heading;
+            mainHeading.style.opacity = '1';
+          }
+          if (mainDescription && description) {
+            mainDescription.innerHTML = description.innerHTML;
+            mainDescription.style.opacity = '1';
+          }
+          items.forEach((entry) => entry.classList.toggle('is-active', entry === item));
+        }, 300);
+      };
+
+      items.forEach((item) => {
+        item.addEventListener('mouseenter', () => changeContent(item));
+        item.addEventListener('click', () => changeContent(item));
+      });
+
+      section.dataset.initialized = 'true';
     };
 
-    items.forEach((item) => {
-      item.addEventListener('mouseenter', () => changeContent(item));
-      item.addEventListener('click', () => changeContent(item));
-    });
-
-    section.dataset.initialized = 'true';
+    initColumn();
+    document.addEventListener('shopify:section:load', (event) => initColumn(event.target));
   })();
 </script>
 
@@ -323,7 +329,6 @@
   "presets": [
     {
       "name": "Hungers Column",
-      "category": "Custom sections",
       "blocks": [
         { "type": "value_item" },
         { "type": "value_item" },
