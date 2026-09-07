@@ -1,6 +1,7 @@
 {% comment %}
-  Collection-aware desktop mega menu.
-  Child links that point to collections become hover tabs with product previews.
+  Modern on-hover floating mega menu.
+  Renders categorized columns of links with headers and sublinks,
+  along with an optional promotional card/banner on the right side.
 {% endcomment %}
 
 <nav class="header__inline-menu">
@@ -9,7 +10,7 @@
       <li>
         {%- if link.links != blank -%}
           <header-menu>
-            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu mega-menu--showcase">
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu mega-menu--modern">
               <summary
                 id="HeaderMenu-{{ link.handle }}"
                 class="header__menu-item list-menu__item link focus-inset"
@@ -21,100 +22,115 @@
                 </span>
               </summary>
 
+              {%- liquid
+                assign promo_block = nil
+                assign link_title_clean = link.title | downcase | strip
+                for block in blocks
+                  if block.type == 'mega_menu_promo'
+                    assign block_title_clean = block.settings.menu_title | downcase | strip
+                    if block_title_clean == link_title_clean
+                      assign promo_block = block
+                      break
+                    endif
+                  endif
+                endfor
+
+                assign has_promo = false
+                if promo_block != nil and promo_block.settings.promo_image != blank
+                  assign has_promo = true
+                elsif link.type == 'collection_link' and link.object.image != blank
+                  assign has_promo = true
+                endif
+              -%}
+
               <div
                 id="MegaMenu-Content-{{ forloop.index }}"
-                class="mega-menu__content mega-showcase color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
-                style="--mega-menu-background: var(--mega-menu-surface); --mega-menu-columns: {{ section.settings.mega_menu_products_to_show }}; --mega-button-background: {{ section.settings.mega_menu_button_background }}; --mega-button-text: {{ section.settings.mega_menu_button_text_color }}; --mega-button-border: {{ section.settings.mega_menu_button_border_color }};"
+                class="mega-menu__content mega-menu__content--floating color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
                 tabindex="-1"
-                data-mega-showcase
               >
-                <div class="mega-showcase__inner page-width">
-                  <div class="mega-showcase__tabs" role="tablist" aria-label="{{ link.title | escape }} collections">
-                    {%- for childlink in link.links -%}
-                      <a
-                        id="MegaTab-{{ link.handle }}-{{ childlink.handle }}"
-                        href="{{ childlink.url }}"
-                        class="mega-showcase__tab{% if forloop.first %} is-active{% endif %}"
-                        role="tab"
-                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                        aria-controls="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
-                        data-mega-tab="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
-                      >
-                        {{ childlink.title | escape }}
-                      </a>
-                    {%- endfor -%}
-                  </div>
-
-                  <div class="mega-showcase__panes">
-                    {%- for childlink in link.links -%}
-                      {%- assign child_collection = childlink.object -%}
-                      <section
-                        id="MegaPane-{{ link.handle }}-{{ childlink.handle }}"
-                        class="mega-showcase__pane{% if forloop.first %} is-active{% endif %}"
-                        role="tabpanel"
-                        aria-labelledby="MegaTab-{{ link.handle }}-{{ childlink.handle }}"
-                        {% unless forloop.first %}hidden{% endunless %}
-                      >
-                        {%- if childlink.type == 'collection_link' and child_collection != blank -%}
-                          <button class="mega-showcase__arrow mega-showcase__arrow--prev" type="button" aria-label="Previous products" data-mega-scroll="-1">
-                            {{- 'icon-caret.svg' | inline_asset_content -}}
-                          </button>
-
-                          <div class="mega-showcase__products" data-mega-product-track>
-                            {%- for product in child_collection.products limit: section.settings.mega_menu_products_to_show -%}
-                              {%- assign preview_text = product.metafields.custom.featured_card_metadata.value | default: product.description -%}
-                              <a class="mega-showcase__product" href="{{ product.url }}">
-                                {%- if product.metafields.custom.featured_card_badge.value != blank -%}
-                                  <span class="mega-showcase__badge">{{ product.metafields.custom.featured_card_badge.value | escape }}</span>
-                                {%- endif -%}
-                                <div class="mega-showcase__image media">
-                                  {%- if product.featured_image != blank -%}
-                                    {{
-                                      product.featured_image
-                                      | image_url: width: 600
-                                      | image_tag:
-                                        loading: 'lazy',
-                                        widths: '220, 320, 440, 600',
-                                        sizes: '(min-width: 990px) 240px, 40vw',
-                                        alt: product.featured_image.alt | default: product.title
-                                    }}
-                                  {%- else -%}
-                                    {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-                                  {%- endif -%}
-                                </div>
-                                <div class="mega-showcase__product-copy">
-                                  <strong>{{ product.title | escape }}</strong>
-                                  {%- if preview_text != blank -%}
-                                    <span>{{ preview_text | strip_html | truncate: 55 }}</span>
-                                  {%- endif -%}
-                                </div>
-                              </a>
-                            {%- else -%}
-                              <p class="mega-showcase__empty">No products found in this collection.</p>
-                            {%- endfor -%}
-                          </div>
-
-                          <button class="mega-showcase__arrow mega-showcase__arrow--next" type="button" aria-label="Next products" data-mega-scroll="1">
-                            {{- 'icon-caret.svg' | inline_asset_content -}}
-                          </button>
-
-                          <a class="mega-showcase__shop-button button button--secondary" href="{{ child_collection.url }}">
-                            {{ section.settings.mega_menu_button_label | escape }}
+                <div class="mega-menu__card-body">
+                  <div class="mega-menu__main-layout{% if has_promo %} mega-menu__main-layout--with-promo{% endif %}">
+                    <div class="mega-menu__categories-columns">
+                      {%- for childlink in link.links -%}
+                        <div class="mega-menu__category-block">
+                          <a href="{{ childlink.url }}" class="mega-menu__category-title">
+                            {{ childlink.title | escape }}
                           </a>
-                        {%- else -%}
-                          <div class="mega-showcase__link-panel">
-                            <a class="mega-showcase__parent-link" href="{{ childlink.url }}">{{ childlink.title | escape }}</a>
-                            {%- if childlink.links != blank -%}
-                              <ul class="list-unstyled" role="list">
-                                {%- for grandchildlink in childlink.links -%}
-                                  <li><a class="mega-menu__link link" href="{{ grandchildlink.url }}">{{ grandchildlink.title | escape }}</a></li>
-                                {%- endfor -%}
-                              </ul>
-                            {%- endif -%}
-                          </div>
+                          {%- if childlink.links != blank -%}
+                            <ul class="mega-menu__sublist list-unstyled" role="list">
+                              {%- for grandchildlink in childlink.links -%}
+                                <li>
+                                  <a href="{{ grandchildlink.url }}" class="mega-menu__sublink">
+                                    {{ grandchildlink.title | escape }}
+                                  </a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endif -%}
+                        </div>
+                      {%- endfor -%}
+                    </div>
+
+                    {%- if has_promo -%}
+                      <div class="mega-menu__promo-container">
+                        {%- if promo_block != nil and promo_block.settings.promo_image != blank -%}
+                          {%- if promo_block.settings.promo_link != blank -%}
+                            <a href="{{ promo_block.settings.promo_link }}" class="mega-menu__promo-card-link">
+                          {%- else -%}
+                            <div class="mega-menu__promo-card-link">
+                          {%- endif -%}
+                            <div class="mega-menu__promo-card">
+                              <div class="mega-menu__promo-image-wrapper">
+                                {{
+                                  promo_block.settings.promo_image
+                                  | image_url: width: 800
+                                  | image_tag:
+                                    loading: 'lazy',
+                                    widths: '240, 360, 500, 800',
+                                    sizes: '280px',
+                                    alt: promo_block.settings.promo_heading | default: promo_block.settings.promo_image.alt | default: link.title,
+                                    class: 'mega-menu__promo-image'
+                                }}
+                              </div>
+                              {%- if promo_block.settings.promo_heading != blank or promo_block.settings.promo_subtext != blank -%}
+                                <div class="mega-menu__promo-text-wrap">
+                                  {%- if promo_block.settings.promo_heading != blank -%}
+                                    <h4 class="mega-menu__promo-heading">{{ promo_block.settings.promo_heading | escape }}</h4>
+                                  {%- endif -%}
+                                  {%- if promo_block.settings.promo_subtext != blank -%}
+                                    <p class="mega-menu__promo-subtext">{{ promo_block.settings.promo_subtext | escape }}</p>
+                                  {%- endif -%}
+                                </div>
+                              {%- endif -%}
+                            </div>
+                          {%- if promo_block.settings.promo_link != blank -%}
+                            </a>
+                          {%- else -%}
+                            </div>
+                          {%- endif -%}
+                        {%- elsif link.type == 'collection_link' and link.object.image != blank -%}
+                          <a href="{{ link.url }}" class="mega-menu__promo-card-link">
+                            <div class="mega-menu__promo-card">
+                              <div class="mega-menu__promo-image-wrapper">
+                                {{
+                                  link.object.image
+                                  | image_url: width: 800
+                                  | image_tag:
+                                    loading: 'lazy',
+                                    widths: '240, 360, 500, 800',
+                                    sizes: '280px',
+                                    alt: link.object.title,
+                                    class: 'mega-menu__promo-image'
+                                }}
+                              </div>
+                              <div class="mega-menu__promo-text-wrap">
+                                <h4 class="mega-menu__promo-heading">{{ link.object.title | escape }}</h4>
+                              </div>
+                            </div>
+                          </a>
                         {%- endif -%}
-                      </section>
-                    {%- endfor -%}
+                      </div>
+                    {%- endif -%}
                   </div>
                 </div>
               </div>

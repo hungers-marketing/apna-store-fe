@@ -27,7 +27,7 @@
 
     const activeIndex = density === 'compact' ? 0 : 1;
     const activeButton = buttons[activeIndex];
-    grid.style.setProperty('--collection-columns-mobile', activeButton.dataset.mobileColumns);
+    grid.style.setProperty('--collection-columns-mobile', '2');
     grid.style.setProperty('--collection-columns-desktop', activeButton.dataset.desktopColumns);
 
     buttons.forEach((button, index) => {

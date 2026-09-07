@@ -48,6 +48,7 @@
 
     const details = menu.querySelector(':scope > details.mega-menu');
     const summary = details?.querySelector(':scope > summary');
+    const content = details?.querySelector('.mega-menu__content');
     const headerSection = menu.closest('.section-header');
     if (!details || !summary) return;
 
@@ -71,12 +72,26 @@
         details.open = false;
         summary.setAttribute('aria-expanded', 'false');
         headerSection?.classList.remove('is-mega-menu-open');
-      }, 180);
+      }, 220);
     };
 
     menu.addEventListener('mouseenter', openMenu);
     menu.addEventListener('mouseleave', scheduleClose);
     menu.addEventListener('focusin', openMenu);
+
+    if (content) {
+      content.addEventListener('mouseenter', openMenu);
+      content.addEventListener('mouseleave', scheduleClose);
+    }
+
+    details.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        details.open = false;
+        summary.setAttribute('aria-expanded', 'false');
+        summary.focus();
+      }
+    });
+
     summary.addEventListener('click', (event) => {
       const parentUrl = summary.dataset.megaParentUrl;
       if (!parentUrl || parentUrl === '#') return;

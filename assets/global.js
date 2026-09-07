@@ -453,14 +453,7 @@ class MenuDrawer extends HTMLElement {
   onSummaryClick(event) {
     const summaryElement = event.currentTarget;
     const detailsElement = summaryElement.parentNode;
-    const parentMenuElement = detailsElement.closest('.has-submenu');
     const isOpen = detailsElement.hasAttribute('open');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    function addTrapFocus() {
-      trapFocus(summaryElement.nextElementSibling, detailsElement.querySelector('button'));
-      summaryElement.nextElementSibling.removeEventListener('transitionend', addTrapFocus);
-    }
 
     if (detailsElement === this.mainDetailsToggle) {
       if (isOpen) event.preventDefault();
@@ -470,14 +463,17 @@ class MenuDrawer extends HTMLElement {
         document.documentElement.style.setProperty('--viewport-height', `${window.innerHeight}px`);
       }
     } else {
-      setTimeout(() => {
-        detailsElement.classList.add('menu-opening');
-        summaryElement.setAttribute('aria-expanded', true);
-        parentMenuElement && parentMenuElement.classList.add('submenu-open');
-        !reducedMotion || reducedMotion.matches
-          ? addTrapFocus()
-          : summaryElement.nextElementSibling.addEventListener('transitionend', addTrapFocus);
-      }, 100);
+      if (isOpen) {
+        event.preventDefault();
+        detailsElement.classList.remove('menu-opening');
+        detailsElement.removeAttribute('open');
+        summaryElement.setAttribute('aria-expanded', 'false');
+      } else {
+        setTimeout(() => {
+          detailsElement.classList.add('menu-opening');
+          summaryElement.setAttribute('aria-expanded', 'true');
+        });
+      }
     }
   }
 
@@ -580,10 +576,9 @@ class HeaderDrawer extends MenuDrawer {
     document.body.classList.add(`overflow-hidden-${this.dataset.breakpoint}`);
   }
 
-  closeMenuDrawer(event, elementToFocus) {
-    if (!elementToFocus) return;
+  closeMenuDrawer(event, elementToFocus = false) {
     super.closeMenuDrawer(event, elementToFocus);
-    this.header.classList.remove('menu-open');
+    this.header && this.header.classList.remove('menu-open');
     window.removeEventListener('resize', this.onResize);
   }
 

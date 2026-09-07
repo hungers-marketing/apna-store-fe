@@ -30,7 +30,7 @@
 <div class="rounded-section rounded-section--footer">
   <footer
     class="footer rounded-section__inner rounded-section__inner--media color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding{% unless section.settings.show_separators %} footer--no-separators{% endunless %}"
-    style="--footer-newsletter-column: 37%; --footer-wordmark-size: {{ section.settings.wordmark_size }}vw; --footer-wordmark-padding: {{ section.settings.wordmark_vertical_padding }}px; --footer-wordmark-color: {{ section.settings.wordmark_color }}; --footer-wordmark-letter-spacing: {{ section.settings.wordmark_letter_spacing }}px; --footer-wordmark-image-width: {{ section.settings.wordmark_image_width }}px; --footer-wordmark-image-width-mobile: {{ section.settings.wordmark_image_width }}px; --footer-navigation-column-gap: {{ section.settings.navigation_column_gap }}px; --footer-navigation-row-gap: {{ section.settings.navigation_column_gap }}px; --footer-navigation-padding: {{ section.settings.navigation_area_padding }}px; --footer-newsletter-padding: 50px; --footer-navigation-heading-size: {{ section.settings.navigation_heading_size }}px; --footer-navigation-heading-size-mobile: {{ section.settings.navigation_heading_size_mobile }}px; --footer-navigation-link-size: {{ section.settings.navigation_link_size }}px; --footer-navigation-link-size-mobile: {{ section.settings.navigation_link_size_mobile }}px; --footer-navigation-link-spacing: {{ section.settings.navigation_link_spacing }}px; --footer-newsletter-heading-size: {{ section.settings.newsletter_heading_size }}px; --footer-newsletter-heading-size-mobile: {{ section.settings.newsletter_heading_size_mobile }}px; --footer-newsletter-text-size: {{ section.settings.newsletter_text_size }}px; --footer-newsletter-form-size: {{ section.settings.newsletter_form_font_size }}px; --footer-newsletter-field-height: {{ section.settings.newsletter_field_height }}px; --footer-newsletter-radius: {{ section.settings.newsletter_corner_radius }}px; --footer-email-field-width: {{ section.settings.email_field_width }}%;"
+    style="--footer-newsletter-column: 37%; --footer-wordmark-size: {{ section.settings.wordmark_size }}vw; --footer-wordmark-padding: {{ section.settings.wordmark_vertical_padding }}px; --footer-wordmark-color: {{ section.settings.wordmark_color }}; --footer-wordmark-letter-spacing: {{ section.settings.wordmark_letter_spacing }}px; --footer-wordmark-image-width: {{ section.settings.wordmark_image_width }}px; --footer-wordmark-image-width-mobile: {{ section.settings.wordmark_image_width }}px; --footer-navigation-column-gap: {{ section.settings.navigation_column_gap }}px; --footer-navigation-row-gap: {{ section.settings.navigation_column_gap }}px; --footer-navigation-padding: {{ section.settings.navigation_area_padding }}px; --footer-newsletter-padding: 50px; --footer-navigation-heading-size: {{ section.settings.navigation_heading_size }}px; --footer-navigation-heading-size-mobile: {{ section.settings.navigation_heading_size_mobile }}px; --footer-navigation-link-size: {{ section.settings.navigation_link_size }}px; --footer-navigation-link-size-mobile: {{ section.settings.navigation_link_size_mobile }}px; --footer-navigation-link-spacing: {{ section.settings.navigation_link_spacing }}px; --footer-newsletter-heading-size: {{ section.settings.newsletter_heading_size }}px; --footer-newsletter-heading-size-mobile: {{ section.settings.newsletter_heading_size_mobile }}px; --footer-newsletter-text-size: {{ section.settings.newsletter_text_size }}px; --footer-newsletter-form-size: {{ section.settings.newsletter_form_font_size }}px; --footer-newsletter-field-height: {{ section.settings.newsletter_field_height }}px; --footer-newsletter-radius: {{ section.settings.newsletter_corner_radius }}px; --footer-email-field-width: {{ section.settings.email_field_width }}%; --footer-newsletter-input-bg: {{ section.settings.newsletter_input_bg | default: '#ffffff' }}; --footer-newsletter-placeholder-color: {{ section.settings.newsletter_placeholder_color | default: '#767676' }}; --footer-newsletter-input-color: {{ section.settings.newsletter_input_color | default: '#111111' }}; --footer-newsletter-button-color: {{ section.settings.newsletter_button_color | default: '#111111' }}; --footer-newsletter-button-bg: {{ section.settings.newsletter_button_bg | default: '#ffffff' }}; --footer-newsletter-divider-color: {{ section.settings.newsletter_divider_color | default: '#e5e5e5' }}; --footer-newsletter-border-color: {{ section.settings.newsletter_border_color | default: '#e5e5e5' }}; --footer-newsletter-field-height-mobile: {{ section.settings.newsletter_field_height_mobile | default: 52 }}px; --footer-newsletter-form-size-mobile: {{ section.settings.newsletter_form_font_size_mobile | default: 14 }}px;"
   >
   {%- liquid
     assign has_social_icons = true
@@ -233,15 +233,13 @@
                       {% elsif form.posted_successfully? %}
                         aria-describedby="ContactFooter-success"
                       {% endif %}
-                      placeholder="{% if section.settings.newsletter_placeholder != blank %}{{ section.settings.newsletter_placeholder | escape }}{% else %}{{ 'newsletter.label' | t }}{% endif %}"
+                      {%- assign placeholder_text = section.settings.newsletter_placeholder | default: 'Email Address' -%}
+                      aria-label="{{ placeholder_text | escape }}"
+                      placeholder="{{ placeholder_text | escape }}"
                       required
                     >
-                    <label class="field__label" for="NewsletterForm--{{ section.id }}">
-                      {%- if section.settings.newsletter_placeholder != blank -%}
-                        {{- section.settings.newsletter_placeholder | escape -}}
-                      {%- else -%}
-                        {{- 'newsletter.label' | t -}}
-                      {%- endif -%}
+                    <label class="field__label visually-hidden" for="NewsletterForm--{{ section.id }}">
+                      {{- placeholder_text | escape -}}
                     </label>
                     <button
                       type="submit"
@@ -837,6 +835,72 @@
       "label": "Email field width",
       "info": "The Subscribe button uses the remaining width.",
       "default": 65
+    },
+    {
+      "type": "range",
+      "id": "newsletter_form_font_size_mobile",
+      "min": 11,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile email and button font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "newsletter_field_height_mobile",
+      "min": 40,
+      "max": 70,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile email container height",
+      "default": 52
+    },
+    {
+      "type": "header",
+      "content": "Newsletter field colors"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_placeholder_color",
+      "label": "Placeholder & label color",
+      "default": "#767676"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_input_color",
+      "label": "Email text color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_input_bg",
+      "label": "Email field background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_button_color",
+      "label": "Button text color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_button_bg",
+      "label": "Button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_divider_color",
+      "label": "Divider line color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "color",
+      "id": "newsletter_border_color",
+      "label": "Container border color",
+      "default": "#e5e5e5"
     },
     {
       "type": "header",

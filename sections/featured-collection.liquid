@@ -71,7 +71,7 @@
 <div class="rounded-section">
   <div
     class="rounded-section__inner rounded-section__inner--media rounded-products color-{{ section.settings.color_scheme }} isolate gradient"
-    style="--featured-mobile-card-width: {{ section.settings.mobile_card_width }}%; --featured-mobile-card-height: {{ section.settings.mobile_card_height }}px; --featured-mobile-card-gap: {{ section.settings.mobile_card_gap }}px;"
+    style="--featured-mobile-card-width: {{ section.settings.mobile_card_width }}%; --featured-mobile-card-height: {{ section.settings.mobile_card_height }}px; --featured-mobile-card-gap: {{ section.settings.mobile_card_gap }}px; --fc-discount-color: {{ section.settings.discount_badge_color | default: '#eb425e' }}; --fc-discount-text-color: {{ section.settings.discount_badge_text_color | default: '#ffffff' }}; --fc-star-color: {{ section.settings.star_color | default: '#eb425e' }}; --fc-price-color: {{ section.settings.price_color | default: '#111827' }}; --fc-card-radius: {{ section.settings.card_radius | default: 16 }}px;"
   >
     <div
       class="collection{% if section.settings.quick_add == 'bulk' %} collection-quick-add-bulk{% endif %} section-{{ section.id }}-padding{% if section.settings.full_width %} collection--full-width{% endif %}"
@@ -104,7 +104,22 @@
         </div>
       {%- endif -%}
 
-    <slider-component class="slider-mobile-gutter{% if section.settings.full_width %} slider-component-full-width{% endif %}{% if show_mobile_slider == false %} page-width{% endif %}{% if show_desktop_slider == false and section.settings.full_width == false %} page-width-desktop{% endif %}{% if show_desktop_slider %} slider-component-desktop{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+    <slider-component class="slider-mobile-gutter fc-slider-wrapper{% if section.settings.full_width %} slider-component-full-width{% endif %}{% if show_mobile_slider == false %} page-width{% endif %}{% if show_desktop_slider == false and section.settings.full_width == false %} page-width-desktop{% endif %}{% if show_desktop_slider %} slider-component-desktop{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {%- if show_mobile_slider or show_desktop_slider -%}
+        <button
+          type="button"
+          class="fc-slider-arrow fc-slider-arrow--prev slider-button slider-button--prev"
+          name="previous"
+          aria-label="{{ 'general.slider.previous_slide' | t }}"
+          aria-controls="Slider-{{ section.id }}"
+        >
+          <span class="svg-wrapper">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </span>
+        </button>
+      {%- endif -%}
       <ul
         id="Slider-{{ section.id }}"
         data-id="{{ section.id }}"
@@ -137,12 +152,17 @@
                   show_secondary_image: section.settings.show_secondary_image,
                   show_vendor: section.settings.show_vendor,
                   show_rating: section.settings.show_rating,
+                  show_rating_count: section.settings.show_rating_count,
+                  show_discount_badge: section.settings.show_discount_badge,
                   skip_styles: skip_card_product_styles,
                   section_id: section.id,
                   quick_add: section.settings.quick_add,
                   product_view_context: 'collection',
                   featured_collection_card: true,
-                  featured_collection_text_color: featured_collection_text_color
+                  featured_collection_text_color: featured_collection_text_color,
+                  show_authentic_badge: section.settings.show_authentic_badge,
+                  authentic_badge_text: section.settings.authentic_badge_text,
+                  show_quick_add_overlay: section.settings.show_quick_add_overlay
                 %}
                 {%- if forloop.first and show_mobile_slider and section.settings.mobile_show_swipe_hint -%}
                   <span class="featured-showcase-swipe-hint" aria-hidden="true">Swipe</span>
@@ -182,49 +202,19 @@
         {%- endif -%}
       </ul>
       {%- if show_mobile_slider or show_desktop_slider -%}
-        <div class="slider-buttons">
-          <button
-            type="button"
-            class="slider-button slider-button--prev"
-            name="previous"
-            aria-label="{{ 'general.slider.previous_slide' | t }}"
-            aria-controls="Slider-{{ section.id }}"
-          >
-            <span class="svg-wrapper">
-              {{- 'icon-caret.svg' | inline_asset_content -}}
-            </span>
-          </button>
-          <div class="slider-counter caption">
-            <span class="slider-counter--current">1</span>
-            <span aria-hidden="true"> / </span>
-            <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
-            <span class="slider-counter--total">{{ products_to_display }}</span>
-          </div>
-          <button
-            type="button"
-            class="slider-button slider-button--next"
-            name="next"
-            aria-label="{{ 'general.slider.next_slide' | t }}"
-            aria-controls="Slider-{{ section.id }}"
-          >
-            <span class="svg-wrapper">
-              {{- 'icon-caret.svg' | inline_asset_content -}}
-            </span>
-          </button>
-        </div>
-      {%- endif -%}
-      {%- if show_mobile_slider and section.settings.mobile_show_dots -%}
-        <div class="featured-showcase-pagination" data-featured-showcase-dots aria-label="Product slides">
-          {%- for i in (1..products_to_display) -%}
-            <button
-              type="button"
-              class="featured-showcase-pagination__dot{% if forloop.first %} is-active{% endif %}"
-              data-slide-index="{{ forloop.index0 }}"
-              aria-label="Go to product {{ forloop.index }}"
-              {% if forloop.first %}aria-current="true"{% endif %}
-            ></button>
-          {%- endfor -%}
-        </div>
+        <button
+          type="button"
+          class="fc-slider-arrow fc-slider-arrow--next slider-button slider-button--next"
+          name="next"
+          aria-label="{{ 'general.slider.next_slide' | t }}"
+          aria-controls="Slider-{{ section.id }}"
+        >
+          <span class="svg-wrapper">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </button>
       {%- endif -%}
     </slider-component>
 
@@ -348,7 +338,7 @@
       "min": 1,
       "max": 6,
       "step": 1,
-      "default": 4,
+      "default": 5,
       "label": "t:sections.featured-collection.settings.columns_desktop.label"
     },
         {
@@ -476,7 +466,7 @@
     {
       "type": "checkbox",
       "id": "show_rating",
-      "default": false,
+      "default": true,
       "label": "t:sections.featured-collection.settings.show_rating.label",
       "info": "t:sections.featured-collection.settings.show_rating.info"
     },
@@ -499,6 +489,74 @@
           "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_3"
         }
       ]
+    },
+    {
+      "type": "header",
+      "content": "Product card styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_discount_badge",
+      "label": "Show discount badge",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_color",
+      "label": "Discount badge background",
+      "default": "#eb425e"
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_text_color",
+      "label": "Discount badge text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Current price color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Rating star color",
+      "default": "#eb425e"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_count",
+      "label": "Show review count number",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_authentic_badge",
+      "label": "Show Authentic badge on image",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "authentic_badge_text",
+      "label": "Authentic badge text",
+      "default": "AUTHENTIC"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quick_add_overlay",
+      "label": "Show quick action button on image",
+      "default": false
     },
     {
       "type": "header",

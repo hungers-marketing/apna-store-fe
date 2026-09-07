@@ -109,33 +109,18 @@
     color: {{ section.settings.solid_header_text_color }};
   }
 
-  .section-header.is-mega-menu-open .header-wrapper,
-  .section-header.is-mega-menu-open .header {
-    background-color: var(--mega-menu-surface) !important;
-    background-image: none !important;
-    box-shadow: none;
-    border-radius: var(--radius-card, 10px) var(--radius-card, 10px) 0 0 !important;
+  .section-header {
+    --mega-menu-underline: {{ section.settings.mega_menu_underline_color | default: section.settings.mega_menu_accent_color | default: '#e54b64' }};
+    --mega-menu-hover: {{ section.settings.mega_menu_hover_color | default: section.settings.mega_menu_accent_color | default: '#e54b64' }};
+    --mega-menu-surface: {{ section.settings.mega_menu_background_color | default: '#ffffff' }};
+    --mega-menu-heading: {{ section.settings.mega_menu_heading_color | default: '#111111' }};
+    --mega-menu-sublink: {{ section.settings.mega_menu_sublink_color | default: '#4a4a4a' }};
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    margin-top: 0;
+    margin-bottom: 0;
   }
-
-  .section-header.is-mega-menu-open .header,
-  .section-header.is-mega-menu-open .header .header__menu-item,
-  .section-header.is-mega-menu-open .header .header__active-menu-item,
-  .section-header.is-mega-menu-open .header .header__desktop-action,
-  .section-header.is-mega-menu-open .header .header__icon,
-  .section-header.is-mega-menu-open .header .header__heading-link,
-  .section-header.menu-open .header,
-  .section-header.menu-open .header .header__icon,
-  .section-header.menu-open .header .header__heading-link {
-    color: {{ section.settings.mega_menu_header_text_color }} !important;
-  }
-
-  .section-header.menu-open .header-wrapper,
-  .section-header.menu-open .header {
-    background-color: var(--mega-menu-surface) !important;
-    background-image: none !important;
-    border-radius: var(--radius-card, 10px) var(--radius-card, 10px) 0 0 !important;
-  }
-
 
   @media screen and (min-width: 990px) {
     .header__inline-menu .header__menu-item,
@@ -144,17 +129,8 @@
     }
 
     .header__inline-menu .header__menu-item:hover {
-      opacity: 0.7;
+      opacity: 1;
     }
-  }
-
-  .section-header {
-    --mega-menu-surface: {{ section.settings.mega_menu_background_color | default: '#f3f2ef' }};
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    margin-top: 8px;
-    margin-bottom: 0;
   }
 
   .template-index .section-header {
@@ -195,7 +171,7 @@
 
   @media screen and (min-width: 750px) {
     .section-header {
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     .template-index .section-header {
@@ -223,17 +199,74 @@
     }
   {%- endif -%}
 
+  .section-header.menu-open .header-wrapper,
+  .section-header.menu-open .header,
+  .section-header:has(.menu-drawer-container[open]) .header-wrapper,
+  .section-header:has(.menu-drawer-container[open]) .header,
+  body.overflow-hidden-tablet .section-header .header-wrapper,
+  body.overflow-hidden-tablet .section-header .header,
+  body.overflow-hidden-desktop .section-header .header-wrapper,
+  body.overflow-hidden-desktop .section-header .header {
+    background-color: {{ section.settings.sticky_header_background_color | default: '#ffffff' }} !important;
+    background-image: none !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .section-header.menu-open .header,
+  .section-header.menu-open .header *,
+  .section-header:has(.menu-drawer-container[open]) .header,
+  .section-header:has(.menu-drawer-container[open]) .header *,
+  body.overflow-hidden-tablet .section-header .header,
+  body.overflow-hidden-tablet .section-header .header *,
+  body.overflow-hidden-desktop .section-header .header,
+  body.overflow-hidden-desktop .section-header .header * {
+    color: {{ section.settings.solid_header_text_color | default: '#111111' }} !important;
+  }
+
+  .section-header.menu-open .header__logo--transparent,
+  .section-header:has(.menu-drawer-container[open]) .header__logo--transparent,
+  body.overflow-hidden-tablet .section-header .header__logo--transparent,
+  body.overflow-hidden-desktop .section-header .header__logo--transparent {
+    display: none !important;
+  }
+
+  .section-header.menu-open .header__logo--default,
+  .section-header:has(.menu-drawer-container[open]) .header__logo--default,
+  body.overflow-hidden-tablet .section-header .header__logo--default,
+  body.overflow-hidden-desktop .section-header .header__logo--default {
+    display: block !important;
+  }
+
   {%- if section.settings.sticky_logo != blank -%}
-    .section-header.is-scrolled .header__logo--sticky {
+    .section-header.is-scrolled .header__logo--sticky,
+    .section-header.menu-open .header__logo--sticky,
+    .section-header:has(.menu-drawer-container[open]) .header__logo--sticky,
+    body.overflow-hidden-tablet .section-header .header__logo--sticky {
       display: block !important;
     }
-    .section-header.is-scrolled .header__logo--default {
+    .section-header.is-scrolled .header__logo--default,
+    .section-header.menu-open .header__logo--default,
+    .section-header:has(.menu-drawer-container[open]) .header__logo--default,
+    body.overflow-hidden-tablet .section-header .header__logo--default {
       display: none !important;
     }
-    .section-header.is-scrolled .header__logo--transparent {
+    .section-header.is-scrolled .header__logo--transparent,
+    .section-header.menu-open .header__logo--transparent,
+    .section-header:has(.menu-drawer-container[open]) .header__logo--transparent,
+    body.overflow-hidden-tablet .section-header .header__logo--transparent {
       display: none !important;
     }
   {%- endif -%}
+
+  .header__icon--menu::before,
+  .header__icon--menu::after,
+  .header__icon--menu[aria-expanded='true']::before,
+  .header__icon--menu[aria-expanded='true']::after,
+  .menu-drawer-container > summary::before,
+  .menu-drawer-container[open] > summary::before {
+    display: none !important;
+    content: none !important;
+  }
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
@@ -272,7 +305,7 @@
       assign localization_forms = true
     endif
   -%}
-  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu_type_desktop == 'mega' %} header--has-mobile-mega{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
+  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
     {%- liquid
       if section.settings.menu != blank
         render 'header-drawer'
@@ -322,7 +355,7 @@
         if section.settings.menu_type_desktop == 'dropdown'
           render 'header-dropdown-menu'
         elsif section.settings.menu_type_desktop != 'drawer'
-          render 'header-mega-menu'
+          render 'header-mega-menu', blocks: section.blocks
         endif
       endif
     %}
@@ -404,7 +437,6 @@
           {%- else -%}
             <span class="svg-wrapper">{{ 'icon-account.svg' | inline_asset_content }}</span>
           {%- endif -%}
-          <span class="header__desktop-action-label">ACCOUNT</span>
           <span class="visually-hidden">
             {%- liquid
               if customer
@@ -430,15 +462,6 @@
         {% else %}
           <span class="svg-wrapper">{{ 'icon-cart.svg' | inline_asset_content }}</span>
         {% endif %}
-        <span class="header__mobile-cart-icon" aria-hidden="true">
-          <svg viewBox="0 0 28 28" fill="none">
-            <path d="M2.5 5h4l2.1 12.1h12.8l2.8-8.3H10.1" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="10.2" cy="22" r="1.4" fill="currentColor"/>
-            <circle cx="21" cy="22" r="1.4" fill="currentColor"/>
-          </svg>
-          <span class="header__mobile-cart-count">{{ cart.item_count }}</span>
-        </span>
-        <span class="header__desktop-action-label">CART ({{ cart.item_count }})</span>
         <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
         {%- if cart != empty -%}
           <div class="cart-count-bubble">
@@ -639,7 +662,7 @@
 {
   "name": "t:sections.header.name",
   "class": "section-header",
-  "max_blocks": 3,
+  "max_blocks": 25,
   "settings": [
     {
       "type": "image_picker",
@@ -743,16 +766,38 @@
       "label": "Mobile products per collection"
     },
     {
-      "type": "color",
-      "id": "mega_menu_background_color",
-      "label": "Mega menu background",
-      "default": "#f3f2ef"
+      "type": "header",
+      "content": "Mega menu colors & styling"
     },
     {
       "type": "color",
-      "id": "mega_menu_header_text_color",
-      "label": "Header text when menu is open",
-      "default": "#6d6a64"
+      "id": "mega_menu_underline_color",
+      "label": "Active underline color",
+      "default": "#e54b64"
+    },
+    {
+      "type": "color",
+      "id": "mega_menu_hover_color",
+      "label": "Category & link hover color",
+      "default": "#e54b64"
+    },
+    {
+      "type": "color",
+      "id": "mega_menu_heading_color",
+      "label": "Category title color",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "mega_menu_sublink_color",
+      "label": "Sublink text color",
+      "default": "#4a4a4a"
+    },
+    {
+      "type": "color",
+      "id": "mega_menu_background_color",
+      "label": "Mega menu background color",
+      "default": "#ffffff"
     },
     {
       "type": "text",
@@ -909,6 +954,38 @@
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "mega_menu_promo",
+      "name": "Mega menu promo banner",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_title",
+          "label": "Menu item title",
+          "info": "Exact title of the top-level menu item to display this promo under (e.g. Haircare, Skincare, Makeup)"
+        },
+        {
+          "type": "image_picker",
+          "id": "promo_image",
+          "label": "Promo image"
+        },
+        {
+          "type": "text",
+          "id": "promo_heading",
+          "label": "Promo heading (optional)"
+        },
+        {
+          "type": "text",
+          "id": "promo_subtext",
+          "label": "Promo subtext (optional)"
+        },
+        {
+          "type": "url",
+          "id": "promo_link",
+          "label": "Promo link (optional)"
+        }
+      ]
     }
   ]
 }

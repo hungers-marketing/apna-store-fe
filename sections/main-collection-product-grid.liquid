@@ -2,6 +2,7 @@
 {{ 'collection-navigation.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'featured-collection-showcase.css' | asset_url | stylesheet_tag }}
 {{ 'collection-showcase.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'collection-showcase.js' | asset_url }}" defer="defer"></script>
 
@@ -63,28 +64,7 @@
       data-collection-id="{{ collection.id }}"
     >
       <div class="section-{{ section.id }}-padding">
-        {%- if section.settings.show_collection_tabs -%}
-          {%- assign tabs_menu = section.settings.collection_tabs_menu -%}
-          {%- assign collection_tab_links = tabs_menu.links -%}
-          {%- for menu_link in tabs_menu.links -%}
-            {%- if menu_link.links != blank -%}
-              {%- assign collection_tab_links = menu_link.links -%}
-              {%- break -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if collection_tab_links != blank -%}
-            {% render 'collection-navigation-tabs',
-              links: collection_tab_links,
-              current_collection: collection,
-              show_all: section.settings.show_all_collection_tab,
-              all_label: section.settings.collection_all_label,
-              text_color: section.settings.collection_tab_text_color,
-              border_color: section.settings.collection_tab_border_color,
-              active_background: section.settings.collection_tab_active_background,
-              active_text_color: section.settings.collection_tab_active_text_color
-            %}
-          {%- endif -%}
-        {%- endif -%}
+
     {%- paginate collection.products by section.settings.products_per_page -%}
       {% comment %} Sort is the first tabbable element when filter type is vertical {% endcomment %}
       {%- if section.settings.enable_sorting and section.settings.filter_type == 'vertical' -%}
@@ -163,7 +143,7 @@
               paginate: paginate
             %}
             <div class="collection-grid-controls" aria-label="Product grid layout">
-              <button class="collection-grid-controls__button" type="button" data-mobile-columns="1" data-desktop-columns="3" aria-label="Use fewer product columns" aria-pressed="false">
+              <button class="collection-grid-controls__button" type="button" data-mobile-columns="2" data-desktop-columns="3" aria-label="Use fewer product columns" aria-pressed="false">
                 <span class="collection-grid-icon collection-grid-icon--compact" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
               </button>
               <button class="collection-grid-controls__button is-active" type="button" data-mobile-columns="2" data-desktop-columns="4" aria-label="Use more product columns" aria-pressed="true">
@@ -197,6 +177,7 @@
           {%- else -%}
             <div
               class="collection rounded-products{% if section.settings.show_new_badge %} collection--show-new-badge{% endif %}"
+              style="--fc-discount-color: {{ section.settings.discount_badge_color | default: '#eb425e' }}; --fc-discount-text-color: {{ section.settings.discount_badge_text_color | default: '#ffffff' }}; --fc-star-color: {{ section.settings.star_color | default: '#eb425e' }}; --fc-price-color: {{ section.settings.price_color | default: '#111827' }}; --fc-card-radius: {{ section.settings.card_radius | default: 16 }}px;"
             >
               <div class="loading-overlay gradient"></div>
               <ul
@@ -228,15 +209,18 @@
                       show_secondary_image: section.settings.show_secondary_image,
                       show_vendor: section.settings.show_vendor,
                       show_rating: section.settings.show_rating,
+                      show_rating_count: section.settings.show_rating_count,
+                      show_discount_badge: section.settings.show_discount_badge,
                       lazy_load: lazy_load,
                       skip_styles: skip_card_product_styles,
                       quick_add: section.settings.quick_add,
                       section_id: section.id,
                       product_view_context: 'collection',
                       featured_collection_card: true,
-                      collection_showcase_card: true,
                       featured_collection_text_color: section.settings.color_scheme.settings.text,
-                      collection_showcase_new_badge: section.settings.show_new_badge
+                      show_authentic_badge: section.settings.show_authentic_badge,
+                      authentic_badge_text: section.settings.authentic_badge_text,
+                      show_quick_add_overlay: section.settings.show_quick_add_overlay
                     %}
                   </li>
                   {%- assign skip_card_product_styles = true -%}
@@ -319,7 +303,7 @@
       "type": "checkbox",
       "id": "show_collection_tabs",
       "label": "Show collection tabs",
-      "default": true
+      "default": false
     },
     {
       "type": "link_list",
@@ -527,7 +511,7 @@
     {
       "type": "checkbox",
       "id": "show_rating",
-      "default": false,
+      "default": true,
       "label": "t:sections.main-collection-product-grid.settings.show_rating.label",
       "info": "t:sections.main-collection-product-grid.settings.show_rating.info"
     },
@@ -550,6 +534,74 @@
           "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_3"
         }
       ]
+    },
+    {
+      "type": "header",
+      "content": "Product card styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_discount_badge",
+      "label": "Show discount badge",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_color",
+      "label": "Discount badge background",
+      "default": "#eb425e"
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_text_color",
+      "label": "Discount badge text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Current price color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Rating star color",
+      "default": "#eb425e"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_count",
+      "label": "Show review count number",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_authentic_badge",
+      "label": "Show Authentic badge on image",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "authentic_badge_text",
+      "label": "Authentic badge text",
+      "default": "AUTHENTIC"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quick_add_overlay",
+      "label": "Show quick action button on image",
+      "default": false
     },
     {
       "type": "header",
