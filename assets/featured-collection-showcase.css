@@ -222,15 +222,32 @@
 }
 
 /* Clickable Link for Media Box */
+.card__media-link,
+a.beauty-card__media-link,
 .beauty-card__media-link {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  cursor: pointer;
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  cursor: pointer !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  text-decoration: none !important;
+}
+
+.card__media-link .card__media,
+.beauty-card__media-link .card__media {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+.card__media-link img,
+.beauty-card__media-link img {
+  pointer-events: none;
 }
 
 /* Hide standard overlay elements inside card__inner */
