@@ -2521,19 +2521,25 @@ input[type='checkbox'] {
   .header--mobile-center .header__heading-link {
     position: absolute;
     top: calc(50% - 0.5rem);
-    left: calc(50% - 30px);
+    left: 50%;
     z-index: 2;
     width: max-content;
-    max-width: calc(100% - 15rem);
+    max-width: calc(100% - 14rem);
     padding: 0;
     transform: translate(-50%, -50%);
     white-space: nowrap;
     word-break: normal;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .header--mobile-center .header__heading > .header__heading-link {
     position: static;
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: max-content;
     max-width: none;
     padding: 0;
@@ -2549,9 +2555,19 @@ input[type='checkbox'] {
     word-break: normal;
   }
 
+  .header--mobile-center .header__heading-logo-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+  }
+
   .header--mobile-center .header__heading-logo {
     display: block;
-    max-height: 3.5rem;
+    width: auto;
+    height: auto;
+    max-height: 5.6rem;
+    max-width: 14rem;
     object-fit: contain;
   }
 
