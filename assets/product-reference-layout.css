@@ -216,6 +216,15 @@
   min-height: 4.2rem;
   padding: 0.8rem 1.6rem;
   white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+}
+
+.product__buy-together .quick-add__submit .icon-wrap,
+.product__buy-together .icon-wrap {
+  display: none !important;
 }
 
 @media screen and (min-width: 990px) {
@@ -363,13 +372,275 @@
     padding: 1.5rem;
   }
 
-  .product__buy-together .card--horizontal .card__content {
-    grid-template-columns: 1fr;
+  /* Buy Together Mobile Responsive Styles */
+  .product__buy-together {
+    padding-top: var(--buy-together-mobile-pt, 2rem);
+    padding-bottom: var(--buy-together-mobile-pb, 1.6rem);
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .product__buy-together .card--horizontal .quick-add {
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: 1rem;
+  .product__buy-together-heading {
+    font-size: var(--buy-together-mobile-heading-size, 2.2rem) !important;
+    line-height: 1.25;
+    margin-bottom: 1.4rem;
+  }
+
+  .product__buy-together--align-center .product__buy-together-heading {
+    text-align: center;
+  }
+
+  /* ---- TABS ON MOBILE ---- */
+  /* Scrollable Pill Chips (Default) */
+  .product__buy-together--tabs-scroll_pills .product__buy-together-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.8rem;
+    margin: 0 -0.4rem 1.6rem;
+    padding: 0.4rem 0.4rem 0.8rem;
+  }
+
+  .product__buy-together--tabs-scroll_pills .product__buy-together-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product__buy-together--tabs-scroll_pills .product__buy-together-tab,
+  .product__buy-together--tabs-wrap_pills .product__buy-together-tab {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+    background: rgba(var(--color-foreground), 0.04);
+    color: rgba(var(--color-foreground), 0.75);
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+
+  .product__buy-together--tabs-scroll_pills .product__buy-together-tab + .product__buy-together-tab::before,
+  .product__buy-together--tabs-wrap_pills .product__buy-together-tab + .product__buy-together-tab::before {
+    display: none !important;
+  }
+
+  .product__buy-together--tabs-scroll_pills .product__buy-together-tab[aria-selected='true'],
+  .product__buy-together--tabs-wrap_pills .product__buy-together-tab[aria-selected='true'] {
+    background: rgb(var(--color-foreground));
+    color: rgb(var(--color-background));
+    border-color: rgb(var(--color-foreground));
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Wrapped Pill Chips */
+  .product__buy-together--tabs-wrap_pills .product__buy-together-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.6rem;
+  }
+
+  /* Clean Underline Tabs */
+  .product__buy-together--tabs-clean_underline .product__buy-together-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.6rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .product__buy-together--tabs-clean_underline .product__buy-together-tab {
+    padding-bottom: 0.4rem;
+    border-bottom: 0.2rem solid transparent;
+    text-decoration: none !important;
+    font-size: 1.3rem;
+  }
+
+  .product__buy-together--tabs-clean_underline .product__buy-together-tab[aria-selected='true'] {
+    border-bottom-color: rgb(var(--color-foreground));
+    color: rgb(var(--color-foreground));
+  }
+
+  .product__buy-together--tabs-clean_underline .product__buy-together-tab + .product__buy-together-tab::before {
+    display: none !important;
+  }
+
+  /* ---- CARD RESPONSIVE LAYOUT ON MOBILE ---- */
+  .product__buy-together .product__buy-together-list {
+    width: 100%;
+    margin: 0;
+  }
+
+  .product__buy-together .product__buy-together-item {
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 0.8rem;
+  }
+
+  .product__buy-together .card-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Stacked Mode (Default): Top row = Image + Details, Bottom row = Full Width Button */
+  .product__buy-together--mobile-stacked .card--horizontal {
+    display: grid !important;
+    grid-template-columns: var(--buy-together-mobile-img-size, 7.5rem) minmax(0, 1fr) !important;
+    column-gap: 1.4rem !important;
+    row-gap: 1.2rem !important;
+    align-items: start !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .card__inner {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: var(--buy-together-mobile-img-size, 7.5rem) !important;
+    height: var(--buy-together-mobile-img-size, 7.5rem) !important;
+    flex: none !important;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .card__content {
+    display: contents !important;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .card__information {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .quick-add {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .quick-add modal-opener,
+  .product__buy-together--mobile-stacked .card--horizontal .quick-add product-form,
+  .product__buy-together--mobile-stacked .card--horizontal .quick-add .form,
+  .product__buy-together--btn-full .quick-add,
+  .product__buy-together--btn-full .quick-add modal-opener,
+  .product__buy-together--btn-full .quick-add product-form,
+  .product__buy-together--btn-full .quick-add .form {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .product__buy-together--mobile-stacked .card--horizontal .quick-add__submit,
+  .product__buy-together--mobile-stacked .quick-add__submit,
+  .product__buy-together--btn-full .quick-add__submit {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-height: 4.4rem !important;
+    font-size: 1.35rem !important;
+    padding: 1rem 1.6rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .product__buy-together .quick-add__submit .icon-wrap,
+  .product__buy-together .icon-wrap {
+    display: none !important;
+  }
+
+  /* Compact Row Mode */
+  .product__buy-together--mobile-compact .card--horizontal {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1.2rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product__buy-together--mobile-compact .card--horizontal .card__inner {
+    flex: 0 0 var(--buy-together-mobile-img-size, 6.5rem) !important;
+    width: var(--buy-together-mobile-img-size, 6.5rem) !important;
+  }
+
+  .product__buy-together--mobile-compact .card--horizontal .card__content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.8rem !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .product__buy-together--mobile-compact .card--horizontal .quick-add {
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .product__buy-together--mobile-compact .quick-add__submit {
+    width: 100% !important;
+    min-height: 3.8rem !important;
+    font-size: 1.2rem !important;
+    padding: 0.6rem 1rem !important;
+  }
+
+  /* Vertical Mode */
+  .product__buy-together--mobile-vertical .card--horizontal {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1.4rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product__buy-together--mobile-vertical .card--horizontal .card__inner {
+    width: 100% !important;
+    max-width: 22rem !important;
+    margin: 0 auto !important;
+    border-radius: 1.2rem !important;
+  }
+
+  .product__buy-together--mobile-vertical .card--horizontal .card__content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    text-align: center !important;
+  }
+
+  /* Heading & info tweaks on mobile */
+  .product__buy-together .card__heading {
+    font-size: 1.45rem !important;
+    line-height: 1.3 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .product__buy-together .product__buy-together-variants {
+    margin-top: 0.3rem !important;
+    gap: 0.2rem 0.8rem !important;
+  }
+
+  .product__buy-together .product__buy-together-variant {
+    font-size: 1.2rem !important;
+  }
+
+  .product__buy-together .card-information .price {
+    margin-top: 0.3rem !important;
+    font-size: 1.35rem !important;
   }
 }
