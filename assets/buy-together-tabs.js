@@ -29,7 +29,13 @@ if (!customElements.get('buy-together-tabs')) {
           this.panels[index].hidden = !isSelected;
         });
 
-        if (moveFocus) this.tabs[selectedIndex].focus();
+        if (moveFocus) {
+          this.tabs[selectedIndex].focus();
+        }
+
+        if (this.tabs[selectedIndex] && typeof this.tabs[selectedIndex].scrollIntoView === 'function') {
+          this.tabs[selectedIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       }
 
       handleKeydown(event, currentIndex) {

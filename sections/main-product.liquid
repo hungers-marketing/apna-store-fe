@@ -689,7 +689,7 @@
                 {%- when 'buy_together' -%}
                   {%- if block.settings.products != blank -%}
                     <buy-together-tabs
-                      class="product__buy-together quick-add-hidden product__buy-together--mobile-{{ block.settings.mobile_card_layout | default: 'stacked' }} product__buy-together--tabs-{{ block.settings.mobile_tabs_style | default: 'scroll_pills' }} product__buy-together--align-{{ block.settings.mobile_heading_alignment | default: 'left' }}{% if block.settings.mobile_button_full_width %} product__buy-together--btn-full{% endif %}"
+                      class="product__buy-together quick-add-hidden product__buy-together--mobile-{{ block.settings.mobile_card_layout | default: 'stacked' }} product__buy-together--tabs-{{ block.settings.mobile_tabs_style | default: 'stacked_pills' }} product__buy-together--align-{{ block.settings.mobile_heading_alignment | default: 'left' }}{% if block.settings.mobile_button_full_width %} product__buy-together--btn-full{% endif %}"
                       style="
                         --buy-together-mobile-pt: {{ block.settings.mobile_padding_top | default: 20 }}px;
                         --buy-together-mobile-pb: {{ block.settings.mobile_padding_bottom | default: 20 }}px;
@@ -711,7 +711,7 @@
                             tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
                             data-buy-together-tab
                           >
-                            {{- related_product.title | escape -}}
+                            <span class="product__buy-together-tab-text">{{- related_product.title | escape -}}</span>
                           </button>
                         {%- endfor -%}
                       </div>
@@ -1628,11 +1628,12 @@
           "id": "mobile_tabs_style",
           "label": "Mobile tabs style",
           "options": [
-            { "value": "scroll_pills", "label": "Scrollable pill chips" },
-            { "value": "wrap_pills", "label": "Wrapped pill chips" },
+            { "value": "stacked_pills", "label": "Stacked pills (One above the other)" },
+            { "value": "wrap_pills", "label": "Wrapped pill chips (Full titles visible)" },
+            { "value": "scroll_pills", "label": "Scrollable horizontal pills" },
             { "value": "clean_underline", "label": "Clean text underline" }
           ],
-          "default": "scroll_pills"
+          "default": "stacked_pills"
         },
         {
           "type": "select",
