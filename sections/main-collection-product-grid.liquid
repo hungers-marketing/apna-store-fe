@@ -121,6 +121,15 @@
               </h2>
               {%- render 'loading-spinner' -%}
             </div>
+
+            <div class="collection-grid-controls" aria-label="Product grid layout">
+              <button class="collection-grid-controls__button" type="button" data-mobile-columns="2" data-desktop-columns="3" aria-label="Use fewer product columns" aria-pressed="false">
+                <span class="collection-grid-icon collection-grid-icon--compact" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              </button>
+              <button class="collection-grid-controls__button is-active" type="button" data-mobile-columns="2" data-desktop-columns="4" aria-label="Use more product columns" aria-pressed="true">
+                <span class="collection-grid-icon collection-grid-icon--roomy" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              </button>
+            </div>
           </form>
         </facet-filters-form>
       {%- endif -%}
@@ -142,14 +151,16 @@
               filter_type: section.settings.filter_type,
               paginate: paginate
             %}
-            <div class="collection-grid-controls" aria-label="Product grid layout">
-              <button class="collection-grid-controls__button" type="button" data-mobile-columns="2" data-desktop-columns="3" aria-label="Use fewer product columns" aria-pressed="false">
-                <span class="collection-grid-icon collection-grid-icon--compact" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-              </button>
-              <button class="collection-grid-controls__button is-active" type="button" data-mobile-columns="2" data-desktop-columns="4" aria-label="Use more product columns" aria-pressed="true">
-                <span class="collection-grid-icon collection-grid-icon--roomy" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-              </button>
-            </div>
+            {%- unless section.settings.filter_type == 'vertical' -%}
+              <div class="collection-grid-controls" aria-label="Product grid layout">
+                <button class="collection-grid-controls__button" type="button" data-mobile-columns="2" data-desktop-columns="3" aria-label="Use fewer product columns" aria-pressed="false">
+                  <span class="collection-grid-icon collection-grid-icon--compact" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                </button>
+                <button class="collection-grid-controls__button is-active" type="button" data-mobile-columns="2" data-desktop-columns="4" aria-label="Use more product columns" aria-pressed="true">
+                  <span class="collection-grid-icon collection-grid-icon--roomy" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </button>
+              </div>
+            {%- endunless -%}
           </aside>
         {%- endif -%}
 
@@ -631,7 +642,7 @@
           "label": "t:sections.main-collection-product-grid.settings.filter_type.options__3.label"
         }
       ],
-      "default": "horizontal",
+      "default": "vertical",
       "label": "t:sections.main-collection-product-grid.settings.filter_type.label"
     },
     {
