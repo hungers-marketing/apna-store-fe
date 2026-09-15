@@ -105,7 +105,7 @@
 .mega-menu__categories-columns {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 2.8rem 3.2rem;
   align-items: start;
 }
