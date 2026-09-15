@@ -175,6 +175,127 @@
     display: none !important;
     content: none !important;
   }
+
+  .header__desktop-search {
+    display: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .header--desktop-two-row {
+      width: 100%;
+      max-width: none;
+      padding-bottom: 0;
+      grid-template-areas:
+        'heading desktop-search icons'
+        'navigation navigation navigation';
+      grid-template-columns: minmax(12rem, 1fr) clamp(34rem, 52vw, 85rem) minmax(12rem, 1fr);
+      column-gap: 3rem;
+      row-gap: 0;
+    }
+
+    .header--desktop-two-row .header__heading,
+    .header--desktop-two-row > .header__heading-link,
+    .header--desktop-two-row .header__desktop-search,
+    .header--desktop-two-row > .header__icons {
+      margin-bottom: {{ section.settings.padding_bottom }}px;
+    }
+
+    .header--desktop-two-row .header__heading,
+    .header--desktop-two-row > .header__heading-link {
+      align-self: center;
+      justify-self: start;
+    }
+
+    .header--desktop-two-row .header__desktop-search {
+      display: block;
+      grid-area: desktop-search;
+      width: 100%;
+      align-self: center;
+      justify-self: center;
+      line-height: normal;
+    }
+
+    .header--desktop-two-row .header__desktop-search predictive-search,
+    .header--desktop-two-row .header__desktop-search search-form,
+    .header--desktop-two-row .header__desktop-search-form {
+      display: block;
+      width: 100%;
+    }
+
+    .header--desktop-two-row .header__desktop-search-form {
+      margin: 0;
+    }
+
+    .header--desktop-two-row .header__desktop-search .field::before {
+      content: none;
+    }
+
+    .header--desktop-two-row .header__desktop-search .field::after {
+      inset: 0;
+      border: 0.1rem solid rgba(var(--color-foreground), 0.18);
+      border-radius: 0.6rem;
+      box-shadow: none;
+    }
+
+    .header--desktop-two-row .header__desktop-search .field:focus-within::after {
+      border-color: rgba(var(--color-foreground), 0.55);
+      box-shadow: 0 0 0 0.1rem rgba(var(--color-foreground), 0.16);
+    }
+
+    .header--desktop-two-row .header__desktop-search .field__input {
+      height: 5.2rem;
+      margin: 0;
+      padding: 0 10rem 0 2rem;
+      color: rgb(var(--color-foreground));
+      background: rgba(var(--color-foreground), 0.045);
+      border-radius: 0.6rem;
+      box-shadow: none;
+      outline: 0;
+      font-size: 1.4rem;
+    }
+
+    .header--desktop-two-row .header__desktop-search .field__input::placeholder {
+      color: rgba(var(--color-foreground), 0.55);
+      opacity: 1;
+    }
+
+    .header--desktop-two-row .header__desktop-search .field__button {
+      top: 0;
+      width: 5.2rem;
+      height: 5.2rem;
+    }
+
+    .header--desktop-two-row .header__desktop-search .search__button {
+      right: 0;
+    }
+
+    .header--desktop-two-row .header__desktop-search .reset__button {
+      right: 5.2rem;
+    }
+
+    .header--desktop-two-row .header__desktop-search .search__button .icon {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .header--desktop-two-row .header__icons > .header__search {
+      display: none !important;
+    }
+
+    .header--desktop-two-row .header__inline-menu {
+      display: flex;
+      width: calc(100% + 10rem);
+      margin: 0 !important;
+      padding: 0.7rem 2.4rem;
+      justify-self: center;
+      justify-content: center;
+      border-top: 0.1rem solid rgba(var(--color-foreground), 0.12);
+    }
+
+    .header--desktop-two-row .header__inline-menu > .list-menu--inline {
+      justify-content: center;
+    }
+  }
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
@@ -213,7 +334,7 @@
       assign localization_forms = true
     endif
   -%}
-  <header class="header header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
+  <header class="header header--desktop-two-row header--{{ section.settings.logo_position }} header--mobile-{{ section.settings.mobile_logo_position }} page-width{% if section.settings.menu_type_desktop == 'drawer' %} drawer-menu{% endif %}{% if section.settings.menu != blank %} header--has-menu{% endif %}{% if has_app_block %} header--has-app{% endif %}{% if social_links %} header--has-social{% endif %}{% if shop.customer_accounts_enabled %} header--has-account{% endif %}{% if localization_forms %} header--has-localizations{% endif %}">
     {%- liquid
       if section.settings.menu != blank
         render 'header-drawer'
@@ -257,6 +378,8 @@
         </h1>
       {%- endif -%}
     {%- endif -%}
+
+    {%- render 'header-inline-search', input_id: 'Search-In-Header-Desktop' -%}
 
     {%- liquid
       if section.settings.menu != blank
