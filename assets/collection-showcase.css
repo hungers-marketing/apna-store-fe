@@ -170,10 +170,10 @@
   }
 
   .collection-showcase .facets-vertical .facets-wrapper {
-    position: sticky;
-    top: calc(var(--header-height, 0px) + 1.5rem);
+    position: relative;
+    top: auto;
     width: 31rem;
-    max-height: calc(100vh - var(--header-height, 0px) - 3rem);
+    max-height: calc(100vh - 3rem);
     margin: 0;
     padding: 2.4rem 2rem;
     flex: 0 0 31rem;
