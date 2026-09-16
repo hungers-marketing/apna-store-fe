@@ -9,6 +9,22 @@ class FacetFiltersForm extends HTMLElement {
 
     const facetForm = this.querySelector('form');
     facetForm.addEventListener('input', this.debouncedOnSubmit.bind(this));
+    facetForm.addEventListener('change', (event) => {
+      if (event.target && event.target.name === 'sort_by') {
+        if (event.target.checked) {
+          facetForm.querySelectorAll('input[name="sort_by"]').forEach((input) => {
+            if (input !== event.target) {
+              input.checked = false;
+              input.closest('.facet-checkbox, .facet-radio')?.classList.remove('active');
+            }
+          });
+          event.target.closest('.facet-checkbox, .facet-radio')?.classList.add('active');
+        } else {
+          event.target.closest('.facet-checkbox, .facet-radio')?.classList.remove('active');
+        }
+        this.onSubmitHandler(event);
+      }
+    });
 
     const facetWrapper = this.querySelector('#FacetsWrapperDesktop');
     if (facetWrapper) facetWrapper.addEventListener('keyup', onKeyUpEscape);

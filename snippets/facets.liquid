@@ -103,7 +103,7 @@
                     id="Details-{{ filter.param_name | escape }}-{{ section.id }}"
                     class="{% if filter_type == 'horizontal' %}disclosure-has-popup facets__disclosure{% else %} facets__disclosure-vertical{% endif %} js-filter"
                     data-index="{{ forloop.index }}"
-                    {% if filter_type == 'vertical' and forloop.index == 1 %}
+                    {% if filter_type == 'vertical' %}
                       open
                     {% endif %}
                   >
@@ -180,7 +180,8 @@
 
                             {%- capture text_value -%}
                               <span class="facet-checkbox__text" aria-hidden="true">
-                                <span class="facet-checkbox__text-label">{{- value.label | escape }}</span> ({{- value.count -}})
+                                <span class="facet-checkbox__text-label">{{- value.label | escape }}</span>
+                                <span class="facet-checkbox__count">({{- value.count -}})</span>
                               </span>
                               <span class="visually-hidden">
                                 {{- value.label | escape }} (
@@ -274,7 +275,7 @@
                     id="Details-{{ filter.param_name | escape }}-{{ section.id }}"
                     class="{% if filter_type == 'horizontal' %}disclosure-has-popup facets__disclosure{% else %} facets__disclosure-vertical{% endif %} js-filter"
                     data-index="{{ forloop.index }}"
-                    {% if filter_type == 'vertical' and forloop.index == 1 %}
+                    {% if filter_type == 'vertical' %}
                       open
                     {% endif %}
                   >
@@ -327,21 +328,63 @@
         {% endif %}
 
         {%- if enable_sorting and filter_type == 'vertical' -%}
-          <div class="facet-filters facets__vertical-sort sorting caption">
-            <div class="facet-filters__field">
-              <h2 class="facet-filters__label caption-large text-body">
-                <label for="SortBy">{{ 'products.facets.sort_by_label' | t }}</label>
-              </h2>
-              <div class="select">
-                {%- render 'facet-sort-select',
-                  sort_options: results.sort_options,
-                  sort_by: sort_by,
-                  select_id: 'SortBy',
-                  select_class: 'facet-filters__sort select__select caption-large'
-                -%}
+          <details
+            id="Details-SortBy-{{ section.id }}"
+            class="facets__disclosure-vertical js-filter"
+            data-index="sort-by"
+            open
+          >
+            <summary class="facets__summary caption-large focus-offset" aria-label="{{ 'products.facets.sort_by_label' | t }}">
+              <div>
+                <span class="facets__summary-label">
+                  {{- 'products.facets.sort_by_label' | t | remove: ':' -}}
+                </span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
               </div>
+            </summary>
+            <div
+              id="Facet-SortBy-{{ section.id }}"
+              class="parent-display facets__display-vertical"
+            >
+              <fieldset class="facets-wrap parent-wrap facets-wrap-vertical">
+                <legend class="visually-hidden">{{ 'products.facets.sort_by_label' | t }}</legend>
+                <ul
+                  class="facets-layout facets-layout-list facets__list--vertical list-unstyled"
+                  role="list"
+                >
+                  {%- for option in results.sort_options -%}
+                    {%- liquid
+                      assign input_id = 'Filter-SortBy-' | append: forloop.index
+                      assign is_active = false
+                      if option.value == sort_by
+                        assign is_active = true
+                      endif
+                    -%}
+                    <li class="list-menu__item facets__item">
+                      <label for="{{ input_id }}" class="facets__label facet-radio{% if is_active %} active{% endif %}">
+                        <input
+                          type="radio"
+                          name="sort_by"
+                          value="{{ option.value | escape }}"
+                          id="{{ input_id }}"
+                          {% if is_active %}
+                            checked
+                          {% endif %}
+                          class="facet-radio__input"
+                        >
+                        <span class="facet-radio__circle">
+                          <span class="facet-radio__dot"></span>
+                        </span>
+                        <span class="facet-radio__text">
+                          <span class="facet-radio__text-label">{{ option.name | escape }}</span>
+                        </span>
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </fieldset>
             </div>
-          </div>
+          </details>
         {%- endif -%}
 
         {%- if filter_type == 'horizontal' -%}
