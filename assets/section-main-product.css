@@ -1714,3 +1714,57 @@ a.product__text {
   color: #475569;
 }
 
+/* Product Trust Badges (Image 2 style) */
+.product__trust-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.6rem 0 1.2rem 0;
+}
+
+.product__trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #fff1f3;
+  border: 1px solid #ffe4e8;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.15s ease;
+}
+
+.product__trust-badge:hover {
+  transform: translateY(-1px);
+}
+
+.product__trust-badge-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+  color: #eb425e;
+}
+
+@media screen and (max-width: 749px) {
+  .product__trust-badges {
+    gap: 0.6rem;
+  }
+
+  .product__trust-badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 1.15rem;
+    gap: 0.5rem;
+  }
+
+  .product__trust-badge-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+}
+
+
