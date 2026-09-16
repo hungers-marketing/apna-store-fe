@@ -1,0 +1,30 @@
+{% comment %}
+  Renders the shared facet sorting select.
+
+  Accepts:
+  - sort_options: {Array} Available sort options
+  - sort_by: {String} Currently selected sort value
+  - select_id: {String} Unique select id
+  - select_class: {String} CSS classes for the select
+{% endcomment %}
+
+<select
+  name="sort_by"
+  class="{{ select_class }}"
+  id="{{ select_id }}"
+  aria-describedby="a11y-refresh-page-message"
+>
+  {%- for option in sort_options -%}
+    <option
+      value="{{ option.value | escape }}"
+      {% if option.value == sort_by %}
+        selected="selected"
+      {% endif %}
+    >
+      {{ option.name | escape }}
+    </option>
+  {%- endfor -%}
+</select>
+<span class="svg-wrapper">
+  {{- 'icon-caret.svg' | inline_asset_content -}}
+</span>
