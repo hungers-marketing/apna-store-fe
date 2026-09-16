@@ -1622,15 +1622,31 @@ a.product__text {
   text-decoration: line-through;
 }
 
-.product:not(.product--reference-layout) .price .price__badge-sale .badge {
-  background-color: #eb425e;
-  border-color: #eb425e;
-  color: #ffffff;
-  border-radius: 4px;
-  padding: 0.2rem 0.8rem;
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: 0.02em;
+.product:not(.product--reference-layout) .price .price__badge-sale,
+.product:not(.product--reference-layout) .price .badge.price__badge-sale,
+.product .price .price__badge-sale,
+.price .price__badge-sale {
+  background-color: #eb425e !important;
+  border: 1px solid #eb425e !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  padding: 0.35rem 0.85rem !important;
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+  letter-spacing: 0.03em !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  margin-left: 0.8rem !important;
+  text-transform: uppercase !important;
+}
+
+.price--on-sale .price__badge-sale {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.price:not(.price--on-sale) .price__badge-sale {
+  display: none !important;
 }
 
 /* Dropdown Variant Picker */
